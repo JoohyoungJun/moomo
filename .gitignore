@@ -44,3 +44,6 @@ pids
 
 # OS
 .DS_Store
+
+# VsCode
+.vscode/
