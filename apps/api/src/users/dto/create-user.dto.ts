@@ -7,7 +7,7 @@ export class CreateUserDto {
     description: '유저 이메일 주소',
   })
   @IsEmail()
-  email!: string;
+  declare email: string;
 
   @ApiProperty({
     example: 'password123',
@@ -15,7 +15,7 @@ export class CreateUserDto {
   })
   @IsString()
   @Length(8, 20)
-  password!: string;
+  declare password: string;
 
   @ApiProperty({
     example: '무모 이용자',
@@ -23,5 +23,5 @@ export class CreateUserDto {
   })
   @IsString()
   @Length(2, 10)
-  nickname!: string;
+  declare nickname: string;
 }

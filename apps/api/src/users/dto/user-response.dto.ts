@@ -2,17 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {
   @ApiProperty()
-  id!: string;
+  declare id: string;
 
   @ApiProperty()
-  email!: string;
+  declare email: string;
 
   @ApiProperty()
-  nickname!: string;
+  declare nickname: string;
 
   @ApiProperty()
-  isAdmin!: boolean;
+  declare isAdmin: boolean;
 
   @ApiProperty()
-  createdAt!: Date;
+  declare createdAt: Date;
 }
