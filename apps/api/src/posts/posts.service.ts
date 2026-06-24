@@ -46,6 +46,23 @@ export class PostsService {
     };
   }
 
+  async getPostById(postId: string) {
+    const post = await this.postsRepository.findPostById(postId);
+
+    if (post === null) {
+      throw new AppException(POSTS_ERRORS.POST_NOT_FOUND);
+    }
+
+    return {
+      id: post.id,
+      title: post.title,
+      content: post.content,
+      authorId: post.authorId,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+    };
+  }
+
   async updatePost(
     postId: string,
     authorId: string,

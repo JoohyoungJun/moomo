@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -42,6 +43,17 @@ export class PostsController {
     @Req() req: Request & { user: JwtAccessUser },
   ) {
     return this.postsService.createPost(createPostsRequestDto, req.user.id);
+  }
+
+  @ApiOperation({ summary: '게시글 상세 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, PostsResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  getPostById(@Param('id') postId: string) {
+    return this.postsService.getPostById(postId);
   }
 
   @ApiOperation({ summary: '게시글 수정' })
