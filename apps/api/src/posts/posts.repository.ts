@@ -1,17 +1,36 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { CreatePostsRequestDto } from './dto/create-posts-request.dto';
+import {
+  CreatePostsRequestDto,
+  UpdatePostsRequestDto,
+} from './dto/posts-request.dto';
 
 @Injectable()
 export class PostsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createPost(postData: CreatePostsRequestDto, authorId: string) {
+  createPost(postData: CreatePostsRequestDto, authorId: string) {
     return this.prisma.post.create({
       data: {
         title: postData.title,
         content: postData.content,
         authorId,
+      },
+    });
+  }
+
+  findPostById(postId: string) {
+    return this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+  }
+
+  updatePost(postId: string, postData: UpdatePostsRequestDto) {
+    return this.prisma.post.update({
+      where: { id: postId },
+      data: {
+        title: postData.title,
+        content: postData.content,
       },
     });
   }

@@ -13,7 +13,7 @@ export const COMMON_ERRORS = {
   },
   FORBIDDEN: {
     status: HttpStatus.FORBIDDEN,
-    message: '접근이 권한이 없습니다.',
+    message: '접근 권한이 없습니다.',
     code: 'FORBIDDEN',
   },
   VALIDATION_ERROR: {
@@ -40,5 +40,18 @@ export const AUTH_ERRORS = {
     status: HttpStatus.UNAUTHORIZED,
     message: '유효하지 않은 토큰입니다.',
     code: 'INVALID_TOKEN',
+  },
+};
+
+export const POSTS_ERRORS = {
+  POST_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    message: '게시글을 찾을 수 없습니다.',
+    code: 'POST_NOT_FOUND',
+  },
+  POST_UPDATE_EMPTY: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '게시글 수정 내용이 없습니다.',
+    code: 'POST_UPDATE_EMPTY',
   },
 };

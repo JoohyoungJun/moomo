@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePostsResponseDto {
+export class PostsResponseDto {
   @ApiProperty({
     description: '게시글 아이디',
     format: 'uuid',

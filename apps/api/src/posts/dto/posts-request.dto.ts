@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsString, Length } from 'class-validator';
 
 export class CreatePostsRequestDto {
@@ -12,3 +12,5 @@ export class CreatePostsRequestDto {
   @Length(1, 2000)
   declare content: string;
 }
+
+export class UpdatePostsRequestDto extends PartialType(CreatePostsRequestDto) {}
