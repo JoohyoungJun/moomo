@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,7 +10,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
 import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
@@ -60,5 +61,24 @@ export class PostsController {
     @Req() req: Request & { user: JwtAccessUser },
   ) {
     return this.postsService.updatePost(postId, req.user.id, updatePostData);
+  }
+
+  @ApiOperation({ summary: '게시글 삭제' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: '게시글 삭제 성공',
+  })
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deletePost(
+    @Param('id') postId: string,
+    @Req() req: Request & { user: JwtAccessUser },
+  ) {
+    return this.postsService.deletePost(postId, req.user.id);
   }
 }

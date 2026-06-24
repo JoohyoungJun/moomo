@@ -112,4 +112,20 @@ export class PostsService {
       updatedAt: updatedPost.updatedAt,
     };
   }
+
+  async deletePost(postId: string, authorId: string) {
+    const post = await this.postsRepository.findPostById(postId);
+
+    if (post === null) {
+      throw new AppException(POSTS_ERRORS.POST_NOT_FOUND);
+    }
+
+    if (post.authorId !== authorId) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    await this.postsRepository.deletePost(postId);
+
+    return;
+  }
 }
