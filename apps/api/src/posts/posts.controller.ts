@@ -33,6 +33,7 @@ export class PostsController {
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(POSTS_ERRORS.POST_TOO_SHORT, POSTS_ERRORS.POST_TOO_LONG)
   @UseGuards(JwtAccessGuard)
   @Post()
   createPost(
@@ -48,6 +49,7 @@ export class PostsController {
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
   @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
+  @ApiErrorResponse(POSTS_ERRORS.POST_TOO_SHORT, POSTS_ERRORS.POST_TOO_LONG)
   @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
   @UseGuards(JwtAccessGuard)
   @HttpCode(HttpStatus.OK)

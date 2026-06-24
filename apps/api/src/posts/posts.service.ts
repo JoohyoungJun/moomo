@@ -6,13 +6,35 @@ import {
 } from './dto/posts-request.dto';
 import { COMMON_ERRORS, POSTS_ERRORS } from '@/common/constants/errors';
 import { AppException } from '@/common/exception/app.exception';
+import {
+  POSTS_MAX_LENGTH_CONTENT,
+  POSTS_MAX_LENGTH_TITLE,
+  POSTS_MIN_LENGTH,
+} from './constants';
 
 @Injectable()
 export class PostsService {
   constructor(private readonly postsRepository: PostsRepository) {}
 
   async createPost(postData: CreatePostsRequestDto, authorId: string) {
-    const post = await this.postsRepository.createPost(postData, authorId);
+    const title = postData.title.trim();
+    const content = postData.content.trim();
+
+    if (title.length < POSTS_MIN_LENGTH || content.length < POSTS_MIN_LENGTH) {
+      throw new AppException(POSTS_ERRORS.POST_TOO_SHORT);
+    }
+
+    if (
+      title.length > POSTS_MAX_LENGTH_TITLE ||
+      content.length > POSTS_MAX_LENGTH_CONTENT
+    ) {
+      throw new AppException(POSTS_ERRORS.POST_TOO_LONG);
+    }
+
+    const post = await this.postsRepository.createPost(
+      { title, content },
+      authorId,
+    );
 
     return {
       id: post.id,
@@ -39,11 +61,47 @@ export class PostsService {
       throw new AppException(COMMON_ERRORS.FORBIDDEN);
     }
 
-    if (postData.title === null && postData.content === null) {
+    const normalizedData: UpdatePostsRequestDto = {};
+
+    if (postData.title !== undefined) {
+      const title = postData.title.trim();
+
+      if (title.length < POSTS_MIN_LENGTH) {
+        throw new AppException(POSTS_ERRORS.POST_TOO_SHORT);
+      }
+
+      if (title.length > POSTS_MAX_LENGTH_TITLE) {
+        throw new AppException(POSTS_ERRORS.POST_TOO_LONG);
+      }
+
+      normalizedData.title = title;
+    }
+
+    if (postData.content !== undefined) {
+      const content = postData.content.trim();
+
+      if (content.length < POSTS_MIN_LENGTH) {
+        throw new AppException(POSTS_ERRORS.POST_TOO_SHORT);
+      }
+
+      if (content.length > POSTS_MAX_LENGTH_CONTENT) {
+        throw new AppException(POSTS_ERRORS.POST_TOO_LONG);
+      }
+
+      normalizedData.content = content;
+    }
+
+    if (
+      normalizedData.title === undefined &&
+      normalizedData.content === undefined
+    ) {
       throw new AppException(POSTS_ERRORS.POST_UPDATE_EMPTY);
     }
 
-    const updatedPost = await this.postsRepository.updatePost(postId, postData);
+    const updatedPost = await this.postsRepository.updatePost(
+      postId,
+      normalizedData,
+    );
 
     return {
       id: updatedPost.id,
