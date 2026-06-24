@@ -47,12 +47,12 @@ export const POSTS_ERRORS = {
   POST_TOO_SHORT: {
     status: HttpStatus.BAD_REQUEST,
     message: '글자 수가 너무 짧습니다.',
-    code: 'POST_TITLE_TOO_SHORT',
+    code: 'POST_TOO_SHORT',
   },
   POST_TOO_LONG: {
     status: HttpStatus.BAD_REQUEST,
     message: '글자 수가 너무 많습니다.',
-    code: 'POST_TITLE_TOO_LONG',
+    code: 'POST_TOO_LONG',
   },
   POST_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,
