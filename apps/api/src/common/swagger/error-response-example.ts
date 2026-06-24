@@ -1,7 +1,6 @@
-export function errorResponseExample(err: { message: string; status: number }) {
+export function errorResponseExample(err: { message: string; code: string }) {
   return {
-    success: false as const,
+    code: err.code,
     message: err.message,
-    error: { code: err.status },
   };
 }

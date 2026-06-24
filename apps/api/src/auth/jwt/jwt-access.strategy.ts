@@ -5,7 +5,9 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload, JwtAccessUser } from './types';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class JwtAccessStrategy extends PassportStrategy(
   Strategy,
   'jwt-access',
