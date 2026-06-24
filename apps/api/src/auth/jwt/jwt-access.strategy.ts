@@ -1,18 +1,15 @@
 import { AUTH_ERRORS } from '@/common/constants/errors';
 import { AppException } from '@/common/exception/app.exception';
 import { UsersRepository } from '@/users/users.repository';
-import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import type { Request } from 'express';
+import { JwtPayload, JwtAccessUser } from './types';
 
-type JwtPayload = {
-  sub: string;
-  email: string;
-};
-
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtAccessStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-access',
+) {
   constructor(private readonly usersRepository: UsersRepository) {
     const secret = process.env.JWT_ACCESS_SECRET;
 
@@ -23,20 +20,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request): string | null => {
-          const token = req.cookies?.accessToken;
-
-          if (typeof token !== 'string') {
-            return null;
-          }
-
-          return token;
+          const cookies = req.cookies as Record<string, string> | undefined;
+          const token = cookies?.accessToken;
+          return typeof token === 'string' ? token : null;
         },
       ]),
       secretOrKey: secret,
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<JwtAccessUser> {
     const user = await this.usersRepository.findById(payload.sub);
 
     if (user === null) {
