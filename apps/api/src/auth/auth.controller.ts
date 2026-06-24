@@ -1,4 +1,13 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -7,7 +16,9 @@ import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorat
 import { AUTH_ERRORS, COMMON_ERRORS } from '@/common/constants/errors';
 import { UserResponseDto } from '@/users/dto/user-response.dto';
 import { SignInRequestDto } from './dto/sign-in-request.dto';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
+import { JwtRefreshGuard } from './jwt/jwt-refresh.guard';
+import { JwtRefreshUser } from './jwt/types';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -29,6 +40,7 @@ export class AuthController {
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
   @ApiErrorResponse(AUTH_ERRORS.INVALID_CREDENTIALS)
+  @HttpCode(HttpStatus.OK)
   @Post('sign-in')
   async signIn(
     @Body() body: SignInRequestDto,
@@ -43,12 +55,37 @@ export class AuthController {
   @ApiOperation({ summary: '로그아웃' })
   @ApiResponse({ status: HttpStatus.OK, description: '로그아웃 성공' })
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @HttpCode(HttpStatus.OK)
   @Post('sign-out')
   signOut(@Res({ passthrough: true }) res: Response) {
     this.authService.clearAuthCookies(res);
 
     return {
       message: '로그아웃이 완료되었습니다.',
+    };
+  }
+
+  @ApiOperation({ summary: '토큰 갱신' })
+  @ApiResponse({ status: HttpStatus.OK, description: '토큰 갱신 성공' })
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(AUTH_ERRORS.INVALID_TOKEN)
+  @UseGuards(JwtRefreshGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  async refresh(
+    @Req() req: Request & { user: JwtRefreshUser },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.refreshToken(
+      req.user.id,
+      req.user.email,
+    );
+
+    this.authService.setAuthCookies(res, accessToken, refreshToken);
+
+    return {
+      message: '토큰 갱신 성공',
     };
   }
 }
