@@ -35,4 +35,10 @@ export const AUTH_ERRORS = {
     message: '이미 가입된 이메일입니다.',
     code: 'USER_ALREADY_EXISTS',
   },
+
+  INVALID_TOKEN: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '유효하지 않은 토큰입니다.',
+    code: 'INVALID_TOKEN',
+  },
 };

@@ -91,6 +91,10 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
+  async refreshToken(userId: string, email: string) {
+    return this.generateTokens(userId, email);
+  }
+
   setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
     res.cookie('accessToken', accessToken, {
       ...cookieOptions,
