@@ -11,6 +11,11 @@ import {
   POSTS_MAX_LENGTH_TITLE,
   POSTS_MIN_LENGTH,
 } from './constants';
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from '@/common/pagination/pagination.util';
 
 @Injectable()
 export class PostsService {
@@ -44,6 +49,24 @@ export class PostsService {
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };
+  }
+
+  async getAllPosts(query: PaginationQueryDto) {
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+
+    const { items, total } = await this.postsRepository.findAllPosts({
+      skip,
+      take,
+    });
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      authorId: item.authorId,
+      createdAt: item.createdAt,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
   }
 
   async getPostById(postId: string) {

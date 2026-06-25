@@ -19,6 +19,19 @@ export class PostsRepository {
     });
   }
 
+  async findAllPosts({ skip, take }: { skip: number; take: number }) {
+    const [items, total] = await Promise.all([
+      this.prisma.post.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.post.count(),
+    ]);
+
+    return { items, total };
+  }
+
   findPostById(postId: string) {
     return this.prisma.post.findUnique({
       where: { id: postId },
