@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import {
   UpdatePostsRequestDto,
 } from './dto/posts-request.dto';
 import { PostsResponseDto } from './dto/posts-response.dto';
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -45,11 +47,20 @@ export class PostsController {
     return this.postsService.createPost(createPostsRequestDto, req.user.id);
   }
 
+  @ApiOperation({ summary: '게시글 목록 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, [PostsResponseDto])
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  getAllPosts(@Query() query: PaginationQueryDto) {
+    return this.postsService.getAllPosts(query);
+  }
+
   @ApiOperation({ summary: '게시글 상세 조회' })
   @ApiSuccessResponse(HttpStatus.OK, PostsResponseDto)
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
-  @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
   @HttpCode(HttpStatus.OK)
   @Get(':id')
   getPostById(@Param('id') postId: string) {
