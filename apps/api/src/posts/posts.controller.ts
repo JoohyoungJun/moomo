@@ -93,6 +93,7 @@ export class PostsController {
   })
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
   @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
   @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
   @UseGuards(JwtAccessGuard)

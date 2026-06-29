@@ -1,16 +1,12 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { CreateCommentsRequestDto } from './dto/comments-request.dto';
+import { CommentsRequestDto } from './dto/comments-request.dto';
 
 @Injectable()
 export class CommentsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  createComment(
-    postId: string,
-    data: CreateCommentsRequestDto,
-    authorId: string,
-  ) {
+  createComment(postId: string, data: CommentsRequestDto, authorId: string) {
     return this.prisma.comment.create({
       data: {
         content: data.content,
@@ -42,12 +38,18 @@ export class CommentsRepository {
     });
   }
 
-  updateComment(commentId: string, data: CreateCommentsRequestDto) {
+  updateComment(commentId: string, data: CommentsRequestDto) {
     return this.prisma.comment.update({
       where: { id: commentId },
       data: {
         content: data.content,
       },
+    });
+  }
+
+  deleteComment(commentId: string) {
+    return this.prisma.comment.delete({
+      where: { id: commentId },
     });
   }
 }
