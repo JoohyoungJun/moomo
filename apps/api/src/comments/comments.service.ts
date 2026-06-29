@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from './comments.repository';
 import { CreateCommentsRequestDto } from './dto/comments-request.dto';
 import { PostsRepository } from '@/posts/posts.repository';
-import { POSTS_ERRORS } from '@/common/constants/errors';
+import {
+  COMMENTS_ERRORS,
+  COMMON_ERRORS,
+  POSTS_ERRORS,
+} from '@/common/constants/errors';
 import { AppException } from '@/common/exception/app.exception';
 import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 import {
@@ -69,5 +73,27 @@ export class CommentsService {
     }));
 
     return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
+  async updateComment(
+    userId: string,
+    commentId: string,
+    data: CreateCommentsRequestDto,
+  ) {
+    const comment = await this.commentsRepository.findCommentById(commentId);
+
+    if (comment === null) {
+      throw new AppException(COMMENTS_ERRORS.COMMENT_NOT_FOUND);
+    }
+
+    if (comment.authorId !== userId) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    if (data.content === undefined) {
+      throw new AppException(COMMENTS_ERRORS.COMMENT_UPDATE_EMPTY);
+    }
+
+    return this.commentsRepository.updateComment(commentId, data);
   }
 }
