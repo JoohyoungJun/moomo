@@ -78,4 +78,10 @@ export const COMMENTS_ERRORS = {
     message: '댓글 수정 내용이 없습니다.',
     code: 'COMMENT_UPDATE_EMPTY',
   },
+
+  COMMENT_POST_MISMATCH: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '댓글과 게시글이 일치하지 않습니다.',
+    code: 'COMMENT_POST_MISMATCH',
+  },
 };

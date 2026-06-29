@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateCommentsResponseDto,
   UpdateCommentsResponseDto,
@@ -25,12 +25,13 @@ import {
   COMMON_ERRORS,
   POSTS_ERRORS,
 } from '@/common/constants/errors';
-import { CreateCommentsRequestDto } from './dto/comments-request.dto';
-import { Request } from 'express';
+import { CommentsRequestDto } from './dto/comments-request.dto';
+import type { Request } from 'express';
 import { JwtAccessUser } from '@/auth/jwt/types';
 import { JwtAccessGuard } from '@/auth/jwt/jwt-access.guard';
 import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 
+@ApiTags('comments')
 @Controller('/posts/:postId/comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
@@ -44,7 +45,7 @@ export class CommentsController {
   @Post()
   createComment(
     @Param('postId') postId: string,
-    @Body() body: CreateCommentsRequestDto,
+    @Body() body: CommentsRequestDto,
     @Req() req: Request & { user: JwtAccessUser },
   ) {
     return this.commentsService.createComment(postId, body, req.user.id);
@@ -69,6 +70,7 @@ export class CommentsController {
   @ApiErrorResponse(
     COMMON_ERRORS.VALIDATION_ERROR,
     COMMENTS_ERRORS.COMMENT_UPDATE_EMPTY,
+    COMMENTS_ERRORS.COMMENT_POST_MISMATCH,
   )
   @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
   @ApiErrorResponse(COMMENTS_ERRORS.COMMENT_NOT_FOUND)
@@ -78,7 +80,7 @@ export class CommentsController {
   updateComment(
     @Param('postId') postId: string,
     @Param('commentId') commentId: string,
-    @Body() body: CreateCommentsRequestDto,
+    @Body() body: CommentsRequestDto,
     @Req() req: Request & { user: JwtAccessUser },
   ) {
     return this.commentsService.updateComment(
@@ -95,6 +97,7 @@ export class CommentsController {
   @ApiErrorResponse(
     COMMON_ERRORS.VALIDATION_ERROR,
     COMMENTS_ERRORS.COMMENT_NOT_FOUND,
+    COMMENTS_ERRORS.COMMENT_POST_MISMATCH,
   )
   @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
   @UseGuards(JwtAccessGuard)

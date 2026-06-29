@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class CreateCommentsRequestDto {
+export class CommentsRequestDto {
   @ApiProperty({ description: '댓글 내용' })
   @IsString()
   @IsNotEmpty()

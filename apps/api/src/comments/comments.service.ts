@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from './comments.repository';
-import { CreateCommentsRequestDto } from './dto/comments-request.dto';
+import { CommentsRequestDto } from './dto/comments-request.dto';
 import { PostsRepository } from '@/posts/posts.repository';
 import {
   COMMENTS_ERRORS,
@@ -23,7 +23,7 @@ export class CommentsService {
 
   async createComment(
     postId: string,
-    data: CreateCommentsRequestDto,
+    data: CommentsRequestDto,
     authorId: string,
   ) {
     const post = await this.postsRepository.findPostById(postId);
@@ -79,7 +79,7 @@ export class CommentsService {
     postId: string,
     userId: string,
     commentId: string,
-    data: CreateCommentsRequestDto,
+    data: CommentsRequestDto,
   ) {
     const post = await this.postsRepository.findPostById(postId);
 
@@ -95,6 +95,10 @@ export class CommentsService {
 
     if (comment.authorId !== userId) {
       throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    if (comment.postId !== postId) {
+      throw new AppException(COMMENTS_ERRORS.COMMENT_POST_MISMATCH);
     }
 
     if (data.content === undefined) {
@@ -115,6 +119,10 @@ export class CommentsService {
 
     if (comment === null) {
       throw new AppException(COMMENTS_ERRORS.COMMENT_NOT_FOUND);
+    }
+
+    if (comment.postId !== postId) {
+      throw new AppException(COMMENTS_ERRORS.COMMENT_POST_MISMATCH);
     }
 
     if (comment.authorId !== userId) {
