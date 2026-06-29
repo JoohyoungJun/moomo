@@ -40,6 +40,7 @@ export class CommentsController {
   @ApiSuccessResponse(HttpStatus.CREATED, CreateCommentsResponseDto)
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
   @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
   @UseGuards(JwtAccessGuard)
   @Post()
@@ -67,6 +68,7 @@ export class CommentsController {
   @ApiOperation({ summary: '댓글 수정' })
   @ApiSuccessResponse(HttpStatus.OK, UpdateCommentsResponseDto)
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
   @ApiErrorResponse(
     COMMON_ERRORS.VALIDATION_ERROR,
     COMMENTS_ERRORS.COMMENT_UPDATE_EMPTY,
@@ -94,6 +96,7 @@ export class CommentsController {
   @ApiOperation({ summary: '댓글 삭제' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: '댓글 삭제 성공' })
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
   @ApiErrorResponse(
     COMMON_ERRORS.VALIDATION_ERROR,
     COMMENTS_ERRORS.COMMENT_NOT_FOUND,
