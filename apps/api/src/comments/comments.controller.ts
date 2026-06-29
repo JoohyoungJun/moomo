@@ -2,8 +2,10 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -11,10 +13,17 @@ import {
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ApiOperation } from '@nestjs/swagger';
-import { CreateCommentsResponseDto } from './dto/comments-response.dto';
+import {
+  CreateCommentsResponseDto,
+  UpdateCommentsResponseDto,
+} from './dto/comments-response.dto';
 import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
-import { COMMON_ERRORS, POSTS_ERRORS } from '@/common/constants/errors';
+import {
+  COMMENTS_ERRORS,
+  COMMON_ERRORS,
+  POSTS_ERRORS,
+} from '@/common/constants/errors';
 import { CreateCommentsRequestDto } from './dto/comments-request.dto';
 import { Request } from 'express';
 import { JwtAccessUser } from '@/auth/jwt/types';
@@ -51,5 +60,25 @@ export class CommentsController {
     @Query() query: PaginationQueryDto,
   ) {
     return this.commentsService.getAllComments(postId, query);
+  }
+
+  @ApiOperation({ summary: '댓글 수정' })
+  @ApiSuccessResponse(HttpStatus.OK, UpdateCommentsResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    COMMENTS_ERRORS.COMMENT_UPDATE_EMPTY,
+  )
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(COMMENTS_ERRORS.COMMENT_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(':id')
+  updateComment(
+    @Param('id') commentId: string,
+    @Body() body: CreateCommentsRequestDto,
+    @Req() req: Request & { user: JwtAccessUser },
+  ) {
+    return this.commentsService.updateComment(req.user.id, commentId, body);
   }
 }

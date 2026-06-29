@@ -35,4 +35,19 @@ export class CommentsRepository {
 
     return { items, total };
   }
+
+  findCommentById(commentId: string) {
+    return this.prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+  }
+
+  updateComment(commentId: string, data: CreateCommentsRequestDto) {
+    return this.prisma.comment.update({
+      where: { id: commentId },
+      data: {
+        content: data.content,
+      },
+    });
+  }
 }

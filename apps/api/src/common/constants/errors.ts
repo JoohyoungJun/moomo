@@ -65,3 +65,17 @@ export const POSTS_ERRORS = {
     code: 'POST_UPDATE_EMPTY',
   },
 };
+
+export const COMMENTS_ERRORS = {
+  COMMENT_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    message: '댓글을 찾을 수 없습니다.',
+    code: 'COMMENT_NOT_FOUND',
+  },
+
+  COMMENT_UPDATE_EMPTY: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '댓글 수정 내용이 없습니다.',
+    code: 'COMMENT_UPDATE_EMPTY',
+  },
+};
