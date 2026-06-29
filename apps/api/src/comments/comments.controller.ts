@@ -49,7 +49,12 @@ export class CommentsController {
     @Body() body: CommentsRequestDto,
     @Req() req: Request & { user: JwtAccessUser },
   ) {
-    return this.commentsService.createComment(postId, body, req.user.id);
+    return this.commentsService.createComment(
+      postId,
+      body,
+      req.user.id,
+      req.user.nickname,
+    );
   }
 
   @ApiOperation({ summary: '댓글 목록 조회' })
