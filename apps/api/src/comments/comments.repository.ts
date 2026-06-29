@@ -50,4 +50,10 @@ export class CommentsRepository {
       },
     });
   }
+
+  deleteComment(commentId: string) {
+    return this.prisma.comment.delete({
+      where: { id: commentId },
+    });
+  }
 }

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -12,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   CreateCommentsResponseDto,
   UpdateCommentsResponseDto,
@@ -73,12 +74,37 @@ export class CommentsController {
   @ApiErrorResponse(COMMENTS_ERRORS.COMMENT_NOT_FOUND)
   @UseGuards(JwtAccessGuard)
   @HttpCode(HttpStatus.OK)
-  @Patch(':id')
+  @Patch(':commentId')
   updateComment(
-    @Param('id') commentId: string,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
     @Body() body: CreateCommentsRequestDto,
     @Req() req: Request & { user: JwtAccessUser },
   ) {
-    return this.commentsService.updateComment(req.user.id, commentId, body);
+    return this.commentsService.updateComment(
+      postId,
+      req.user.id,
+      commentId,
+      body,
+    );
+  }
+
+  @ApiOperation({ summary: '댓글 삭제' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: '댓글 삭제 성공' })
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    COMMENTS_ERRORS.COMMENT_NOT_FOUND,
+  )
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':commentId')
+  deleteComment(
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Req() req: Request & { user: JwtAccessUser },
+  ) {
+    return this.commentsService.deleteComment(postId, req.user.id, commentId);
   }
 }

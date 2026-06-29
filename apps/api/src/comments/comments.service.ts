@@ -76,10 +76,17 @@ export class CommentsService {
   }
 
   async updateComment(
+    postId: string,
     userId: string,
     commentId: string,
     data: CreateCommentsRequestDto,
   ) {
+    const post = await this.postsRepository.findPostById(postId);
+
+    if (post === null) {
+      throw new AppException(POSTS_ERRORS.POST_NOT_FOUND);
+    }
+
     const comment = await this.commentsRepository.findCommentById(commentId);
 
     if (comment === null) {
@@ -95,5 +102,25 @@ export class CommentsService {
     }
 
     return this.commentsRepository.updateComment(commentId, data);
+  }
+
+  async deleteComment(postId: string, userId: string, commentId: string) {
+    const post = await this.postsRepository.findPostById(postId);
+
+    if (post === null) {
+      throw new AppException(POSTS_ERRORS.POST_NOT_FOUND);
+    }
+
+    const comment = await this.commentsRepository.findCommentById(commentId);
+
+    if (comment === null) {
+      throw new AppException(COMMENTS_ERRORS.COMMENT_NOT_FOUND);
+    }
+
+    if (comment.authorId !== userId) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    await this.commentsRepository.deleteComment(commentId);
   }
 }
