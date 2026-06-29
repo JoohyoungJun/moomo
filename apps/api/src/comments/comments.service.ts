@@ -13,18 +13,21 @@ import {
   buildPaginationResponse,
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
+import { NotificationsService } from '@/notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private readonly commentsRepository: CommentsRepository,
     private readonly postsRepository: PostsRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async createComment(
     postId: string,
     data: CommentsRequestDto,
     authorId: string,
+    authorNickname: string,
   ) {
     const post = await this.postsRepository.findPostById(postId);
 
@@ -37,6 +40,17 @@ export class CommentsService {
       data,
       authorId,
     );
+
+    if (post.authorId !== authorId) {
+      await this.notificationsService.createCommentNotification({
+        postAuthorId: post.authorId,
+        commentAuthorId: authorId,
+        commentAuthorNickname: authorNickname,
+        postTitle: post.title,
+        postId: postId,
+        commentId: comment.id,
+      });
+    }
 
     return {
       id: comment.id,

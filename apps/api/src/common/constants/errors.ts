@@ -85,3 +85,11 @@ export const COMMENTS_ERRORS = {
     code: 'COMMENT_POST_MISMATCH',
   },
 };
+
+export const USERS_ERRORS = {
+  USER_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    message: '사용자를 찾을 수 없습니다.',
+    code: 'USER_NOT_FOUND',
+  },
+};
