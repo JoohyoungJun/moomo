@@ -61,6 +61,14 @@ export class PostsRepository {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+        },
       }),
       this.prisma.post.count({ where: { authorId } }),
     ]);

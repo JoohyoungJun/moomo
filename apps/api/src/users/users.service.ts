@@ -47,6 +47,8 @@ export class UsersService {
       id: item.id,
       title: item.title,
       authorId: item.authorId,
+      likesCount: item._count.likes,
+      commentsCount: item._count.comments,
       createdAt: item.createdAt,
     }));
 
