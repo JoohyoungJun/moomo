@@ -6,6 +6,9 @@ import {
   buildPaginationResponse,
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
+import { AppException } from '@/common/exception/app.exception';
+import { NOTIFICATIONS_ERRORS } from '@/common/constants/errors';
+import { MarkAsReadResponseDto } from './dto/notification-response.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -51,5 +54,29 @@ export class NotificationsService {
     }));
 
     return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
+  async markAsRead(
+    notificationId: string,
+    userId: string,
+  ): Promise<MarkAsReadResponseDto> {
+    const notification =
+      await this.notificationsRepository.findNotificationById(notificationId);
+
+    if (notification === null) {
+      throw new AppException(NOTIFICATIONS_ERRORS.NOTIFICATION_NOT_FOUND);
+    }
+
+    if (notification.userId !== userId) {
+      throw new AppException(NOTIFICATIONS_ERRORS.NOTIFICATION_USER_MISMATCH);
+    }
+
+    const updated =
+      await this.notificationsRepository.markAsRead(notificationId);
+
+    return {
+      id: notification.id,
+      isRead: updated.isRead,
+    };
   }
 }
