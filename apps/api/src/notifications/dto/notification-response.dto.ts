@@ -30,3 +30,8 @@ export class MarkAsReadResponseDto {
   @ApiProperty({ example: false })
   declare isRead: boolean;
 }
+
+export class HasUnreadResponseDto {
+  @ApiProperty({ example: true })
+  declare hasUnread: boolean;
+}

@@ -18,7 +18,10 @@ import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorat
 import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 import { Request } from 'express';
 import { JwtAccessUser } from '@/auth/jwt/types';
-import { NotificationResponseDto } from './dto/notification-response.dto';
+import {
+  HasUnreadResponseDto,
+  NotificationResponseDto,
+} from './dto/notification-response.dto';
 
 @ApiTags('notifications')
 @Controller('notifications')
@@ -72,5 +75,17 @@ export class NotificationsController {
   @Patch('read-all')
   markAllAsRead(@Req() req: Request & { user: JwtAccessUser }) {
     return this.notificationsService.markAllAsRead(req.user.id);
+  }
+
+  @ApiOperation({ summary: '읽지 않은 알림 여부 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, HasUnreadResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('has-unread')
+  hasUnread(@Req() req: Request & { user: JwtAccessUser }) {
+    return this.notificationsService.hasUnread(req.user.id);
   }
 }
