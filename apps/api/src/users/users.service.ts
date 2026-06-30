@@ -3,10 +3,19 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UserMeResponseDto } from './dto/user-response.dto';
 import { AppException } from '@/common/exception/app.exception';
+import { PostsRepository } from '@/posts/posts.repository';
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from '@/common/pagination/pagination.util';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly postsRepository: PostsRepository,
+  ) {}
 
   async getMe(userId: string): Promise<UserMeResponseDto> {
     const user = await this.usersRepository.findById(userId);
@@ -21,5 +30,23 @@ export class UsersService {
       nickname: user.nickname,
       createdAt: user.createdAt,
     };
+  }
+
+  async getMyPosts(userId: string, query: PaginationQueryDto) {
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+
+    const { items, total } = await this.postsRepository.findPostsByAuthorId(
+      userId,
+      { skip, take },
+    );
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      authorId: item.authorId,
+      createdAt: item.createdAt,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
   }
 }
