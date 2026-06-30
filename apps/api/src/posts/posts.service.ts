@@ -54,10 +54,10 @@ export class PostsService {
   async getAllPosts(query: PaginationQueryDto) {
     const { page, pageSize, skip, take } = getPaginationParams(query);
 
-    const { items, total } = await this.postsRepository.findAllPosts({
+    const { items, total } = await this.postsRepository.findAllPosts(
       skip,
       take,
-    });
+    );
 
     const mappedItems = items.map((item) => ({
       id: item.id,

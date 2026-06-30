@@ -19,7 +19,7 @@ export class PostsRepository {
     });
   }
 
-  async findAllPosts({ skip, take }: { skip: number; take: number }) {
+  async findAllPosts(skip: number, take: number) {
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
         skip,
@@ -38,10 +38,7 @@ export class PostsRepository {
     });
   }
 
-  async findPostsByAuthorId(
-    authorId: string,
-    { skip, take }: { skip: number; take: number },
-  ) {
+  async findPostsByAuthorId(authorId: string, skip: number, take: number) {
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
         where: { authorId },
