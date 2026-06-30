@@ -25,6 +25,14 @@ export class PostsRepository {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+        },
       }),
       this.prisma.post.count(),
     ]);
@@ -35,6 +43,14 @@ export class PostsRepository {
   findPostById(postId: string) {
     return this.prisma.post.findUnique({
       where: { id: postId },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
+      },
     });
   }
 
