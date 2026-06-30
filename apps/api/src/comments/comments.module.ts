@@ -10,5 +10,6 @@ import { NotificationsModule } from '@/notifications/notifications.module';
   imports: [PrismaModule, PostsModule, NotificationsModule],
   providers: [CommentsService, CommentsRepository],
   controllers: [CommentsController],
+  exports: [CommentsRepository],
 })
 export class CommentsModule {}
