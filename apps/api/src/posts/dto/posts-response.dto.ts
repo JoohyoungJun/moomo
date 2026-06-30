@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 
 export class PostsResponseDto {
   @ApiProperty({
@@ -19,9 +19,25 @@ export class PostsResponseDto {
   })
   declare authorId: string;
 
+  @ApiProperty({ example: 3 })
+  declare likesCount: number;
+
+  @ApiProperty({ example: 5 })
+  declare commentsCount: number;
+
   @ApiProperty({ description: '게시글 작성 일시' })
   declare createdAt: Date;
 
   @ApiProperty({ description: '게시글 수정 일시' })
   declare updatedAt: Date;
 }
+
+export class PostListResponseDto extends OmitType(PostsResponseDto, [
+  'content',
+  'updatedAt',
+]) {}
+
+export class UpdatedPostsResponseDto extends OmitType(PostsResponseDto, [
+  'commentsCount',
+  'likesCount',
+]) {}

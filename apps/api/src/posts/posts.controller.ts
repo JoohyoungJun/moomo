@@ -24,7 +24,10 @@ import {
   CreatePostsRequestDto,
   UpdatePostsRequestDto,
 } from './dto/posts-request.dto';
-import { PostsResponseDto } from './dto/posts-response.dto';
+import {
+  PostListResponseDto,
+  PostsResponseDto,
+} from './dto/posts-response.dto';
 import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 
 @ApiTags('posts')
@@ -48,7 +51,7 @@ export class PostsController {
   }
 
   @ApiOperation({ summary: '게시글 목록 조회' })
-  @ApiSuccessResponse(HttpStatus.OK, [PostsResponseDto])
+  @ApiSuccessResponse(HttpStatus.OK, [PostListResponseDto])
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
   @HttpCode(HttpStatus.OK)

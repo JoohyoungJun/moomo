@@ -16,6 +16,10 @@ import {
   buildPaginationResponse,
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
+import {
+  PostsResponseDto,
+  UpdatedPostsResponseDto,
+} from './dto/posts-response.dto';
 
 @Injectable()
 export class PostsService {
@@ -63,13 +67,15 @@ export class PostsService {
       id: item.id,
       title: item.title,
       authorId: item.authorId,
+      likesCount: item._count.likes,
+      commentsCount: item._count.comments,
       createdAt: item.createdAt,
     }));
 
     return buildPaginationResponse(mappedItems, total, page, pageSize);
   }
 
-  async getPostById(postId: string) {
+  async getPostById(postId: string): Promise<PostsResponseDto> {
     const post = await this.postsRepository.findPostById(postId);
 
     if (post === null) {
@@ -81,6 +87,8 @@ export class PostsService {
       title: post.title,
       content: post.content,
       authorId: post.authorId,
+      likesCount: post._count.likes,
+      commentsCount: post._count.comments,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };
@@ -90,7 +98,7 @@ export class PostsService {
     postId: string,
     authorId: string,
     postData: UpdatePostsRequestDto,
-  ) {
+  ): Promise<UpdatedPostsResponseDto> {
     const post = await this.postsRepository.findPostById(postId);
 
     if (post === null) {
