@@ -38,6 +38,20 @@ export class CommentsRepository {
     });
   }
 
+  async findCommentsByAuthorId(authorId: string, skip: number, take: number) {
+    const [items, total] = await Promise.all([
+      this.prisma.comment.findMany({
+        where: { authorId },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.comment.count({ where: { authorId } }),
+    ]);
+
+    return { items, total };
+  }
+
   updateComment(commentId: string, data: CommentsRequestDto) {
     return this.prisma.comment.update({
       where: { id: commentId },

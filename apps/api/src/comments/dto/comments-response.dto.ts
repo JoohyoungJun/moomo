@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 
 export class CreateCommentsResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -20,19 +20,12 @@ export class CreateCommentsResponseDto {
   declare updatedAt: Date;
 }
 
-export class UpdateCommentsResponseDto {
-  @ApiProperty({ format: 'uuid' })
-  declare id: string;
+export class UpdateCommentsResponseDto extends OmitType(
+  CreateCommentsResponseDto,
+  ['createdAt'],
+) {}
 
-  @ApiProperty({ description: '댓글 내용' })
-  declare content: string;
-
-  @ApiProperty({ format: 'uuid' })
-  declare postId: string;
-
-  @ApiProperty({ format: 'uuid' })
-  declare authorId: string;
-
-  @ApiProperty({ description: '댓글 수정 일시' })
-  declare updatedAt: Date;
-}
+export class MyCommentsResponseDto extends OmitType(CreateCommentsResponseDto, [
+  'authorId',
+  'updatedAt',
+]) {}

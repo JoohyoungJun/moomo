@@ -1,3 +1,4 @@
+import { CommentsRepository } from './../comments/comments.repository';
 import { USERS_ERRORS } from './../common/constants/errors';
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
@@ -15,6 +16,7 @@ export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly postsRepository: PostsRepository,
+    private readonly commentsRepository: CommentsRepository,
   ) {}
 
   async getMe(userId: string): Promise<UserMeResponseDto> {
@@ -44,6 +46,22 @@ export class UsersService {
       id: item.id,
       title: item.title,
       authorId: item.authorId,
+      createdAt: item.createdAt,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
+  async getMyComments(userId: string, query: PaginationQueryDto) {
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+
+    const { items, total } =
+      await this.commentsRepository.findCommentsByAuthorId(userId, skip, take);
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      content: item.content,
+      postId: item.postId,
       createdAt: item.createdAt,
     }));
 
