@@ -79,4 +79,12 @@ export class NotificationsService {
       isRead: updated.isRead,
     };
   }
+
+  async markAllAsRead(userId: string) {
+    await this.notificationsRepository.markAllAsRead(userId);
+
+    return {
+      message: '알림 모두 읽음 처리 성공',
+    };
+  }
 }

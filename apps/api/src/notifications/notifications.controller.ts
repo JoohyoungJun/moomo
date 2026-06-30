@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
 import { JwtAccessGuard } from '@/auth/jwt/jwt-access.guard';
 import { COMMON_ERRORS, NOTIFICATIONS_ERRORS } from '@/common/constants/errors';
@@ -57,5 +57,20 @@ export class NotificationsController {
     @Req() req: Request & { user: JwtAccessUser },
   ) {
     return this.notificationsService.markAsRead(notificationId, req.user.id);
+  }
+
+  @ApiOperation({ summary: '알림 모두 읽음 처리' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '알림 모두 읽음 처리 성공',
+  })
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch('read-all')
+  markAllAsRead(@Req() req: Request & { user: JwtAccessUser }) {
+    return this.notificationsService.markAllAsRead(req.user.id);
   }
 }
