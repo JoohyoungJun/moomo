@@ -86,6 +86,19 @@ export const COMMENTS_ERRORS = {
   },
 };
 
+export const NOTIFICATIONS_ERRORS = {
+  NOTIFICATION_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    message: '알림을 찾을 수 없습니다.',
+    code: 'NOTIFICATION_NOT_FOUND',
+  },
+  NOTIFICATION_USER_MISMATCH: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '알림 소유자가 일치하지 않습니다.',
+    code: 'NOTIFICATION_USER_MISMATCH',
+  },
+};
+
 export const USERS_ERRORS = {
   USER_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,

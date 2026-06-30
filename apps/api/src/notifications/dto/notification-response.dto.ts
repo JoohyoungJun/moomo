@@ -22,3 +22,11 @@ export class NotificationResponseDto {
   @ApiProperty({ description: '알림 생성 시간' })
   declare createdAt: Date;
 }
+
+export class MarkAsReadResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  declare id: string;
+
+  @ApiProperty({ example: false })
+  declare isRead: boolean;
+}
