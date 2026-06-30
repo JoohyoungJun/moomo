@@ -38,6 +38,23 @@ export class PostsRepository {
     });
   }
 
+  async findPostsByAuthorId(
+    authorId: string,
+    { skip, take }: { skip: number; take: number },
+  ) {
+    const [items, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { authorId },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.post.count({ where: { authorId } }),
+    ]);
+
+    return { items, total };
+  }
+
   updatePost(postId: string, postData: UpdatePostsRequestDto) {
     return this.prisma.post.update({
       where: { id: postId },
