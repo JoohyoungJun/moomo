@@ -8,7 +8,10 @@ import {
 } from '@/common/pagination/pagination.util';
 import { AppException } from '@/common/exception/app.exception';
 import { NOTIFICATIONS_ERRORS } from '@/common/constants/errors';
-import { MarkAsReadResponseDto } from './dto/notification-response.dto';
+import {
+  HasUnreadResponseDto,
+  MarkAsReadResponseDto,
+} from './dto/notification-response.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -85,6 +88,14 @@ export class NotificationsService {
 
     return {
       message: '알림 모두 읽음 처리 성공',
+    };
+  }
+
+  async hasUnread(userId: string): Promise<HasUnreadResponseDto> {
+    const hasUnread = await this.notificationsRepository.hasUnread(userId);
+
+    return {
+      hasUnread,
     };
   }
 }
