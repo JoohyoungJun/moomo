@@ -4,9 +4,12 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptior';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalInterceptors(new TransformResponseInterceptor());
 
   app.useGlobalPipes(
     new ValidationPipe({
