@@ -39,7 +39,8 @@ export class UsersService {
 
     const { items, total } = await this.postsRepository.findPostsByAuthorId(
       userId,
-      { skip, take },
+      skip,
+      take,
     );
 
     const mappedItems = items.map((item) => ({
