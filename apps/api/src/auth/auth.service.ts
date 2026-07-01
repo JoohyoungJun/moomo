@@ -1,6 +1,7 @@
 import { AUTH_ERRORS, USERS_ERRORS } from '@/common/constants/errors';
 import { AppException } from '@/common/exception/app.exception';
 import {
+  CreateUserConfirmPasswordDto,
   CreateUserDto,
   USER_NICKNAME_MAX_LENGTH,
   USER_NICKNAME_MIN_LENGTH,
@@ -12,7 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import { SignInRequestDto } from './dto/sign-in-request.dto';
-import { cookieOptions } from './constants/auth.constants';
+import { cookieOptions, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, SALT_ROUNDS } from './constants/auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -21,8 +22,20 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async createUser(userData: CreateUserDto): Promise<UserResponseDto> {
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
+  async createUser(userData: CreateUserConfirmPasswordDto): Promise<UserResponseDto> {
+    if (userData.password !== userData.passwordConfirm) {
+      throw new AppException(AUTH_ERRORS.PASSWORD_MISMATCH);
+    }
+
+    if (userData.password.length < PASSWORD_MIN_LENGTH) {
+      throw new AppException(AUTH_ERRORS.PASSWORD_TOO_SHORT);
+    }
+
+    if (userData.password.length > PASSWORD_MAX_LENGTH) {
+      throw new AppException(AUTH_ERRORS.PASSWORD_TOO_LONG);
+    }
+
+    const hashedPassword = await bcrypt.hash(userData.password, SALT_ROUNDS);
 
     const isUserExist = await this.usersRepository.findByEmail(userData.email);
     if (isUserExist) {

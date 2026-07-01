@@ -41,6 +41,24 @@ export const AUTH_ERRORS = {
     message: '유효하지 않은 토큰입니다.',
     code: 'INVALID_TOKEN',
   },
+
+  PASSWORD_TOO_SHORT: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '비밀번호가 너무 짧습니다.',
+    code: 'PASSWORD_TOO_SHORT',
+  },
+
+  PASSWORD_TOO_LONG: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '비밀번호가 너무 깁니다.',
+    code: 'PASSWORD_TOO_LONG',
+  },
+
+  PASSWORD_MISMATCH: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '비밀번호가 일치하지 않습니다.',
+    code: 'PASSWORD_MISMATCH',
+  },
 };
 
 export const POSTS_ERRORS = {
@@ -100,6 +118,17 @@ export const NOTIFICATIONS_ERRORS = {
 };
 
 export const USERS_ERRORS = {
+  CURRENTPASSWORD_INCORRECT: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '현재 비밀번호가 올바르지 않습니다.',
+    code: 'USER_PASSWORD_INCORRECT',
+  },
+  NEW_PASSWORD_SAME_AS_CURRENT: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '새 비밀번호와 현재 비밀번호가 같습니다.',
+    code: 'NEW_PASSWORD_SAME_AS_CURRENT',
+  },
+
   USER_NICKNAME_TOO_SHORT: {
     status: HttpStatus.BAD_REQUEST,
     message: '닉네임이 너무 짧습니다.',
@@ -123,11 +152,7 @@ export const USERS_ERRORS = {
     message: '사용자 정보 수정 내용이 없습니다.',
     code: 'USER_UPDATE_EMPTY',
   },
-  USER_EMAIL_ALREADY_EXISTS: {
-    status: HttpStatus.BAD_REQUEST,
-    message: '이미 가입된 이메일입니다.',
-    code: 'USER_EMAIL_ALREADY_EXISTS',
-  },
+
   USER_NICKNAME_ALREADY_EXISTS: {
     status: HttpStatus.BAD_REQUEST,
     message: '이미 사용 중인 닉네임입니다.',

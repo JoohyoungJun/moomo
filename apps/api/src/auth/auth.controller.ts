@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '@/users/dto/user-request.dto';
+import { CreateUserConfirmPasswordDto } from '@/users/dto/user-request.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
@@ -28,10 +28,15 @@ export class AuthController {
   @ApiOperation({ summary: '회원가입' })
   @ApiSuccessResponse(HttpStatus.CREATED, UserResponseDto)
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
-  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    AUTH_ERRORS.PASSWORD_MISMATCH,
+    AUTH_ERRORS.PASSWORD_TOO_SHORT,
+    AUTH_ERRORS.PASSWORD_TOO_LONG,
+  )
   @ApiErrorResponse(AUTH_ERRORS.USER_ALREADY_EXISTS)
   @Post('signup')
-  signUp(@Body() createUserDto: CreateUserDto) {
+  signUp(@Body() createUserDto: CreateUserConfirmPasswordDto) {
     return this.authService.createUser(createUserDto);
   }
 

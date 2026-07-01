@@ -17,9 +17,12 @@ export class CreateUserDto {
     description: '유저 비밀번호',
   })
   @IsString()
-  @Length(8, 20)
   declare password: string;
 
+  @ApiProperty({
+    example: 'password123',
+    description: '유저 비밀번호 확인',
+  })
   @ApiProperty({
     example: '무모 이용자',
     description: '유저 닉네임',
@@ -29,6 +32,25 @@ export class CreateUserDto {
   declare nickname: string;
 }
 
+export class CreateUserConfirmPasswordDto extends CreateUserDto {
+  @ApiProperty({
+    example: 'password123',
+    description: '유저 비밀번호 확인',
+  })
+  @IsString()
+  declare passwordConfirm: string;
+}
+
 export class UpdateUserDto extends PartialType(
   OmitType(CreateUserDto, ['password']),
 ) {}
+
+export class UpdatePasswordDto {
+  @ApiProperty({ example: 'oldpw123' })
+  @IsString()
+  declare currentPassword: string;
+
+  @ApiProperty({ example: 'newpw123' })
+  @IsString()
+  declare newPassword: string;
+}

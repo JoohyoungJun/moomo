@@ -6,7 +6,7 @@ import { CreateUserDto, UpdateUserDto } from './dto/user-request.dto';
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createUser(userData: CreateUserDto) {
+  createUser(userData: CreateUserDto) {
     return this.prisma.user.create({
       data: {
         email: userData.email,
@@ -16,10 +16,17 @@ export class UsersRepository {
     });
   }
 
-  async updateUser(id: string, data: UpdateUserDto) {
+  updateUser(id: string, data: UpdateUserDto) {
     return this.prisma.user.update({
       where: { id },
       data,
+    });
+  }
+
+  updatePassword(id: string, passwordHash: string) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { passwordHash },
     });
   }
 
