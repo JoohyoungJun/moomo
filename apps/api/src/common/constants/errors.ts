@@ -100,6 +100,18 @@ export const NOTIFICATIONS_ERRORS = {
 };
 
 export const USERS_ERRORS = {
+  USER_NICKNAME_TOO_SHORT: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '닉네임이 너무 짧습니다.',
+    code: 'USER_NICKNAME_TOO_SHORT',
+  },
+
+  USER_NICKNAME_TOO_LONG: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '닉네임이 너무 깁니다.',
+    code: 'USER_NICKNAME_TOO_LONG',
+  },
+
   USER_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,
     message: '사용자를 찾을 수 없습니다.',

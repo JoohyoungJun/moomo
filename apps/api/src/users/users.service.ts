@@ -10,7 +10,11 @@ import {
   buildPaginationResponse,
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
-import { UpdateUserDto } from './dto/user-request.dto';
+import {
+  UpdateUserDto,
+  USER_NICKNAME_MAX_LENGTH,
+  USER_NICKNAME_MIN_LENGTH,
+} from './dto/user-request.dto';
 
 @Injectable()
 export class UsersService {
@@ -102,6 +106,14 @@ export class UsersService {
 
       if (nicknameExists !== null && nicknameExists.id !== userId) {
         throw new AppException(USERS_ERRORS.USER_NICKNAME_ALREADY_EXISTS);
+      }
+
+      if (data.nickname.length < USER_NICKNAME_MIN_LENGTH) {
+        throw new AppException(USERS_ERRORS.USER_NICKNAME_TOO_SHORT);
+      }
+
+      if (data.nickname.length > USER_NICKNAME_MAX_LENGTH) {
+        throw new AppException(USERS_ERRORS.USER_NICKNAME_TOO_LONG);
       }
     }
 
