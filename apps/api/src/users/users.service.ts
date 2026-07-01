@@ -1,5 +1,5 @@
 import { CommentsRepository } from './../comments/comments.repository';
-import { USERS_ERRORS } from './../common/constants/errors';
+import { AUTH_ERRORS, USERS_ERRORS } from './../common/constants/errors';
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { UserMeResponseDto } from './dto/user-response.dto';
@@ -11,10 +11,17 @@ import {
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
 import {
+  UpdatePasswordDto,
   UpdateUserDto,
   USER_NICKNAME_MAX_LENGTH,
   USER_NICKNAME_MIN_LENGTH,
 } from './dto/user-request.dto';
+import * as bcrypt from 'bcrypt';
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  SALT_ROUNDS,
+} from '@/auth/constants/auth.constants';
 
 @Injectable()
 export class UsersService {
@@ -96,7 +103,7 @@ export class UsersService {
       const emailExists = await this.usersRepository.findByEmail(data.email);
 
       if (emailExists !== null && emailExists.id !== userId) {
-        throw new AppException(USERS_ERRORS.USER_EMAIL_ALREADY_EXISTS);
+        throw new AppException(AUTH_ERRORS.USER_ALREADY_EXISTS);
       }
     }
 
@@ -126,6 +133,43 @@ export class UsersService {
       nickname: updated.nickname,
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
+    };
+  }
+
+  async changePassword(userId: string, data: UpdatePasswordDto) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      data.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!isPasswordValid) {
+      throw new AppException(USERS_ERRORS.CURRENTPASSWORD_INCORRECT);
+    }
+
+    if (data.newPassword === data.currentPassword) {
+      throw new AppException(USERS_ERRORS.NEW_PASSWORD_SAME_AS_CURRENT);
+    }
+
+    if (data.newPassword.length < PASSWORD_MIN_LENGTH) {
+      throw new AppException(AUTH_ERRORS.PASSWORD_TOO_SHORT);
+    }
+
+    if (data.newPassword.length > PASSWORD_MAX_LENGTH) {
+      throw new AppException(AUTH_ERRORS.PASSWORD_TOO_LONG);
+    }
+
+    const passwordHash = await bcrypt.hash(data.newPassword, SALT_ROUNDS);
+
+    await this.usersRepository.updatePassword(userId, passwordHash);
+
+    return {
+      message: '비밀번호 변경 성공',
     };
   }
 }
