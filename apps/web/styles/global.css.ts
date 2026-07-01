@@ -7,3 +7,9 @@ globalStyle('body', {
   backgroundColor: '#f8f9fb',
   color: '#111827',
 });
+
+globalStyle('main', {
+  maxWidth: '1100px',
+  margin: '0 auto',
+  padding: '32px 24px',
+});
