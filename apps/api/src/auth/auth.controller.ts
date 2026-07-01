@@ -35,7 +35,7 @@ export class AuthController {
     AUTH_ERRORS.PASSWORD_TOO_LONG,
   )
   @ApiErrorResponse(AUTH_ERRORS.USER_ALREADY_EXISTS)
-  @Post('signup')
+  @Post('sign-up')
   signUp(@Body() createUserDto: CreateUserConfirmPasswordDto) {
     return this.authService.createUser(createUserDto);
   }
