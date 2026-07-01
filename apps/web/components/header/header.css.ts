@@ -5,9 +5,11 @@ export const header = style({
   position: 'sticky',
   top: 0,
   zIndex: 100,
+  flexShrink: 0,
   height: layout.headerHeight,
   backgroundColor: colors.background,
   borderBottom: `1px solid ${colors.border}`,
+  overflow: 'visible',
 });
 
 export const inner = style({
@@ -19,6 +21,7 @@ export const inner = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '24px',
+  overflow: 'visible',
 });
 
 export const logo = style({
@@ -65,4 +68,5 @@ export const authGroup = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
+  overflow: 'visible',
 });

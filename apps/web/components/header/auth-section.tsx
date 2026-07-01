@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import * as styles from './header.css';
 import { UserMenu } from './user-menu';
+import { NotificationBell } from './notification-bell';
 import Link from 'next/link';
 
 type Me = {
@@ -24,8 +25,13 @@ export function AuthSection() {
     return <div className={styles.authGroup} />;
   }
 
-  if (user) {
-    return <UserMenu nickname={user.nickname} />;
+  if (user && user.id) {
+    return (
+      <div className={styles.authGroup}>
+        <NotificationBell />
+        <UserMenu nickname={user.nickname} />
+      </div>
+    );
   }
 
   return (

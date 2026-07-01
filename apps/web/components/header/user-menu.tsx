@@ -29,9 +29,12 @@ export function UserMenu({ nickname }: Props) {
   }, []);
 
   const handleLogout = async () => {
-    await apiFetch('/auth/sign-out', { method: 'POST' });
-    await queryClient.invalidateQueries({ queryKey: ['me'] });
     setOpen(false);
+
+    await apiFetch('/auth/sign-out', { method: 'POST' });
+
+    queryClient.setQueryData(['me'], null);
+    queryClient.removeQueries({ queryKey: ['notifications'] });
     router.push('/');
     router.refresh();
   };
@@ -53,16 +56,7 @@ export function UserMenu({ nickname }: Props) {
 
       {open && (
         <div className={styles.dropdown}>
-          <p
-            style={{
-              padding: '8px 12px',
-              fontSize: '13px',
-              color: '#6b7280',
-              margin: 0,
-            }}
-          >
-            {nickname}
-          </p>
+          <p className={styles.dropdownNickname}>{nickname}</p>
           <Link
             href="/me"
             className={styles.dropdownItem}
