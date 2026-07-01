@@ -86,6 +86,30 @@ export class PostsRepository {
     return { items, total };
   }
 
+  findLikeByUserAndPost(userId: string, postId: string) {
+    return this.prisma.like.findUnique({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+  }
+
+  async findLikedPostIdsByUser(userId: string, postIds: string[]) {
+    if (postIds.length === 0) {
+      return [];
+    }
+
+    const likes = await this.prisma.like.findMany({
+      where: {
+        userId,
+        postId: { in: postIds },
+      },
+      select: { postId: true },
+    });
+
+    return likes.map((like) => like.postId);
+  }
+
   updatePost(postId: string, postData: UpdatePostsRequestDto) {
     return this.prisma.post.update({
       where: { id: postId },
