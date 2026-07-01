@@ -1,6 +1,10 @@
-import { AUTH_ERRORS } from '@/common/constants/errors';
+import { AUTH_ERRORS, USERS_ERRORS } from '@/common/constants/errors';
 import { AppException } from '@/common/exception/app.exception';
-import { CreateUserDto } from '@/users/dto/create-user.dto';
+import {
+  CreateUserDto,
+  USER_NICKNAME_MAX_LENGTH,
+  USER_NICKNAME_MIN_LENGTH,
+} from '@/users/dto/user-request.dto';
 import { UserResponseDto } from '@/users/dto/user-response.dto';
 import { UsersRepository } from '@/users/users.repository';
 import { Injectable } from '@nestjs/common';
@@ -23,6 +27,14 @@ export class AuthService {
     const isUserExist = await this.usersRepository.findByEmail(userData.email);
     if (isUserExist) {
       throw new AppException(AUTH_ERRORS.USER_ALREADY_EXISTS);
+    }
+
+    if (userData.nickname.length < USER_NICKNAME_MIN_LENGTH) {
+      throw new AppException(USERS_ERRORS.USER_NICKNAME_TOO_SHORT);
+    }
+
+    if (userData.nickname.length > USER_NICKNAME_MAX_LENGTH) {
+      throw new AppException(USERS_ERRORS.USER_NICKNAME_TOO_LONG);
     }
 
     const user = await this.usersRepository.createUser({

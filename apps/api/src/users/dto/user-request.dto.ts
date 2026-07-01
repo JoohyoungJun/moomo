@@ -1,5 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType, OmitType } from '@nestjs/swagger';
 import { IsEmail, IsString, Length } from 'class-validator';
+
+export const USER_NICKNAME_MIN_LENGTH = 2;
+export const USER_NICKNAME_MAX_LENGTH = 10;
 
 export class CreateUserDto {
   @ApiProperty({
@@ -25,3 +28,7 @@ export class CreateUserDto {
   @Length(2, 10)
   declare nickname: string;
 }
+
+export class UpdateUserDto extends PartialType(
+  OmitType(CreateUserDto, ['password']),
+) {}

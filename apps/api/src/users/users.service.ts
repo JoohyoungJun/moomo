@@ -10,6 +10,11 @@ import {
   buildPaginationResponse,
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
+import {
+  UpdateUserDto,
+  USER_NICKNAME_MAX_LENGTH,
+  USER_NICKNAME_MIN_LENGTH,
+} from './dto/user-request.dto';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +36,7 @@ export class UsersService {
       email: user.email,
       nickname: user.nickname,
       createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 
@@ -69,5 +75,56 @@ export class UsersService {
     }));
 
     return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
+  async updateMe(
+    userId: string,
+    data: UpdateUserDto,
+  ): Promise<UserMeResponseDto> {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    if (data.email === undefined && data.nickname === undefined) {
+      throw new AppException(USERS_ERRORS.USER_UPDATE_EMPTY);
+    }
+
+    if (data.email !== undefined) {
+      const emailExists = await this.usersRepository.findByEmail(data.email);
+
+      if (emailExists !== null && emailExists.id !== userId) {
+        throw new AppException(USERS_ERRORS.USER_EMAIL_ALREADY_EXISTS);
+      }
+    }
+
+    if (data.nickname !== undefined) {
+      const nicknameExists = await this.usersRepository.findByNickname(
+        data.nickname,
+      );
+
+      if (nicknameExists !== null && nicknameExists.id !== userId) {
+        throw new AppException(USERS_ERRORS.USER_NICKNAME_ALREADY_EXISTS);
+      }
+
+      if (data.nickname.length < USER_NICKNAME_MIN_LENGTH) {
+        throw new AppException(USERS_ERRORS.USER_NICKNAME_TOO_SHORT);
+      }
+
+      if (data.nickname.length > USER_NICKNAME_MAX_LENGTH) {
+        throw new AppException(USERS_ERRORS.USER_NICKNAME_TOO_LONG);
+      }
+    }
+
+    const updated = await this.usersRepository.updateUser(userId, data);
+
+    return {
+      id: updated.id,
+      email: updated.email,
+      nickname: updated.nickname,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
   }
 }

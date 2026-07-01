@@ -17,4 +17,7 @@ export class UserResponseDto {
   declare createdAt: Date;
 }
 
-export class UserMeResponseDto extends OmitType(UserResponseDto, ['isAdmin']) {}
+export class UserMeResponseDto extends OmitType(UserResponseDto, ['isAdmin']) {
+  @ApiProperty({ description: '유저 정보 수정 일시' })
+  declare updatedAt: Date;
+}
