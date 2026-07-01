@@ -19,6 +19,9 @@ export class PostsResponseDto {
   })
   declare authorId: string;
 
+  @ApiProperty({ description: '작성자 닉네임' })
+  declare authorNickname: string;
+
   @ApiProperty({ example: 3 })
   declare likesCount: number;
 
@@ -40,4 +43,5 @@ export class PostListResponseDto extends OmitType(PostsResponseDto, [
 export class UpdatedPostsResponseDto extends OmitType(PostsResponseDto, [
   'commentsCount',
   'likesCount',
+  'authorNickname',
 ]) {}

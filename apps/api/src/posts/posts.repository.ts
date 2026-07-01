@@ -32,6 +32,11 @@ export class PostsRepository {
               comments: true,
             },
           },
+          author: {
+            select: {
+              nickname: true,
+            },
+          },
         },
       }),
       this.prisma.post.count(),
@@ -48,6 +53,11 @@ export class PostsRepository {
           select: {
             likes: true,
             comments: true,
+          },
+        },
+        author: {
+          select: {
+            nickname: true,
           },
         },
       },
