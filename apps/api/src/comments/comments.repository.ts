@@ -23,6 +23,18 @@ export class CommentsRepository {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        include: {
+          author: {
+            select: {
+              nickname: true,
+            },
+          },
+          post: {
+            select: {
+              title: true,
+            },
+          },
+        },
       }),
       this.prisma.comment.count({
         where: { postId },
@@ -45,6 +57,13 @@ export class CommentsRepository {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        include: {
+          post: {
+            select: {
+              title: true,
+            },
+          },
+        },
       }),
       this.prisma.comment.count({ where: { authorId } }),
     ]);

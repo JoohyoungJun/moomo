@@ -81,7 +81,9 @@ export class CommentsService {
       id: item.id,
       content: item.content,
       postId: item.postId,
+      postTitle: item.post.title,
       authorId: item.authorId,
+      authorNickname: item.author.nickname,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     }));
