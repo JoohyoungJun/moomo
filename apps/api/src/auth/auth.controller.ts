@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/user-request.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';

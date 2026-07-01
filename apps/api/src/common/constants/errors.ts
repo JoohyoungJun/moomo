@@ -105,4 +105,20 @@ export const USERS_ERRORS = {
     message: '사용자를 찾을 수 없습니다.',
     code: 'USER_NOT_FOUND',
   },
+
+  USER_UPDATE_EMPTY: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '사용자 정보 수정 내용이 없습니다.',
+    code: 'USER_UPDATE_EMPTY',
+  },
+  USER_EMAIL_ALREADY_EXISTS: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이미 가입된 이메일입니다.',
+    code: 'USER_EMAIL_ALREADY_EXISTS',
+  },
+  USER_NICKNAME_ALREADY_EXISTS: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '이미 사용 중인 닉네임입니다.',
+    code: 'USER_NICKNAME_ALREADY_EXISTS',
+  },
 };

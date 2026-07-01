@@ -1,6 +1,6 @@
 import { AUTH_ERRORS } from '@/common/constants/errors';
 import { AppException } from '@/common/exception/app.exception';
-import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/user-request.dto';
 import { UserResponseDto } from '@/users/dto/user-response.dto';
 import { UsersRepository } from '@/users/users.repository';
 import { Injectable } from '@nestjs/common';
