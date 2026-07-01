@@ -18,6 +18,7 @@ import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorat
 import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
 import { COMMON_ERRORS, POSTS_ERRORS } from '@/common/constants/errors';
 import { JwtAccessGuard } from '@/auth/jwt/jwt-access.guard';
+import { OptionalJwtAccessGuard } from '@/auth/jwt/optional-jwt-access.guard';
 import type { JwtAccessUser } from '@/auth/jwt/types';
 import { PostsService } from './posts.service';
 import {
@@ -54,20 +55,28 @@ export class PostsController {
   @ApiSuccessResponse(HttpStatus.OK, [PostListResponseDto])
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @UseGuards(OptionalJwtAccessGuard)
   @HttpCode(HttpStatus.OK)
   @Get()
-  getAllPosts(@Query() query: PaginationQueryDto) {
-    return this.postsService.getAllPosts(query);
+  getAllPosts(
+    @Query() query: PaginationQueryDto,
+    @Req() req: Request & { user: JwtAccessUser | null },
+  ) {
+    return this.postsService.getAllPosts(query, req.user?.id);
   }
 
   @ApiOperation({ summary: '게시글 상세 조회' })
   @ApiSuccessResponse(HttpStatus.OK, PostsResponseDto)
   @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
   @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @UseGuards(OptionalJwtAccessGuard)
   @HttpCode(HttpStatus.OK)
   @Get(':id')
-  getPostById(@Param('id') postId: string) {
-    return this.postsService.getPostById(postId);
+  getPostById(
+    @Param('id') postId: string,
+    @Req() req: Request & { user: JwtAccessUser | null },
+  ) {
+    return this.postsService.getPostById(postId, req.user?.id);
   }
 
   @ApiOperation({ summary: '게시글 수정' })

@@ -55,13 +55,23 @@ export class PostsService {
     };
   }
 
-  async getAllPosts(query: PaginationQueryDto) {
+  async getAllPosts(query: PaginationQueryDto, userId?: string) {
     const { page, pageSize, skip, take } = getPaginationParams(query);
 
     const { items, total } = await this.postsRepository.findAllPosts(
       skip,
       take,
     );
+
+    const likedPostIds =
+      userId !== undefined
+        ? await this.postsRepository.findLikedPostIdsByUser(
+            userId,
+            items.map((item) => item.id),
+          )
+        : [];
+
+    const likedSet = new Set(likedPostIds);
 
     const mappedItems = items.map((item) => ({
       id: item.id,
@@ -70,17 +80,31 @@ export class PostsService {
       authorNickname: item.author.nickname,
       likesCount: item._count.likes,
       commentsCount: item._count.comments,
+      isLiked: userId !== undefined ? likedSet.has(item.id) : false,
       createdAt: item.createdAt,
     }));
 
     return buildPaginationResponse(mappedItems, total, page, pageSize);
   }
 
-  async getPostById(postId: string): Promise<PostsResponseDto> {
+  async getPostById(
+    postId: string,
+    userId?: string,
+  ): Promise<PostsResponseDto> {
     const post = await this.postsRepository.findPostById(postId);
 
     if (post === null) {
       throw new AppException(POSTS_ERRORS.POST_NOT_FOUND);
+    }
+
+    let isLiked = false;
+
+    if (userId !== undefined) {
+      const like = await this.postsRepository.findLikeByUserAndPost(
+        userId,
+        postId,
+      );
+      isLiked = like !== null;
     }
 
     return {
@@ -91,6 +115,7 @@ export class PostsService {
       authorNickname: post.author.nickname,
       likesCount: post._count.likes,
       commentsCount: post._count.comments,
+      isLiked,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };

@@ -25,6 +25,9 @@ export class PostsResponseDto {
   @ApiProperty({ example: 3 })
   declare likesCount: number;
 
+  @ApiProperty({ example: true })
+  declare isLiked: boolean;
+
   @ApiProperty({ example: 5 })
   declare commentsCount: number;
 
@@ -44,4 +47,5 @@ export class UpdatedPostsResponseDto extends OmitType(PostsResponseDto, [
   'commentsCount',
   'likesCount',
   'authorNickname',
+  'isLiked',
 ]) {}
