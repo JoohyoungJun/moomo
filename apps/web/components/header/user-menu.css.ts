@@ -29,19 +29,28 @@ export const dropdown = style({
   top: 'calc(100% + 8px)',
   right: 0,
   minWidth: '160px',
-  padding: '8px',
+  padding: '4px',
   backgroundColor: colors.background,
   border: `1px solid ${colors.border}`,
   borderRadius: '12px',
   boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+  overflow: 'hidden',
+});
+
+export const dropdownNickname = style({
+  margin: 0,
+  padding: '8px 12px 4px',
+  fontSize: '13px',
+  color: colors.textMuted,
 });
 
 export const dropdownItem = style({
   display: 'block',
   width: '100%',
+  boxSizing: 'border-box',
   padding: '10px 12px',
   border: 'none',
-  borderRadius: '8px',
+  borderRadius: '6px',
   backgroundColor: 'transparent',
   fontSize: '14px',
   fontWeight: 500,
@@ -49,6 +58,7 @@ export const dropdownItem = style({
   textAlign: 'left',
   textDecoration: 'none',
   cursor: 'pointer',
+  lineHeight: 1.4,
 
   ':hover': {
     backgroundColor: colors.surface,
