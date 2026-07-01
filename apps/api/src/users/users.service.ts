@@ -71,6 +71,7 @@ export class UsersService {
       id: item.id,
       content: item.content,
       postId: item.postId,
+      postTitle: item.post.title,
       createdAt: item.createdAt,
     }));
 
