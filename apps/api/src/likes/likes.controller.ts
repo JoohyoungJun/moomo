@@ -36,6 +36,6 @@ export class LikesController {
     @Param('postId') postId: string,
     @Req() req: Request & { user: JwtAccessUser },
   ) {
-    return this.likesService.toggleLike(req.user.id, postId);
+    return this.likesService.toggleLike(req.user.id, postId, req.user.nickname);
   }
 }

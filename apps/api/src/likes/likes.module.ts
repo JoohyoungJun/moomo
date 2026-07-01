@@ -4,9 +4,10 @@ import { LikesController } from './likes.controller';
 import { LikesRepository } from './likes.repository';
 import { PrismaModule } from '@/prisma/prisma.module';
 import { PostsModule } from '@/posts/posts.module';
+import { NotificationsModule } from '@/notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, PostsModule],
+  imports: [PrismaModule, PostsModule, NotificationsModule],
   providers: [LikesService, LikesRepository],
   controllers: [LikesController],
 })

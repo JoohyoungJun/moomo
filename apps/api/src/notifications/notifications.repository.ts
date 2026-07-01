@@ -11,7 +11,7 @@ export class NotificationsRepository {
     type: NotificationType;
     message: string;
     postId: string;
-    commentId: string;
+    commentId?: string;
   }) {
     return this.prisma.notification.create({
       data: {
@@ -19,7 +19,7 @@ export class NotificationsRepository {
         type: data.type,
         message: data.message,
         postId: data.postId,
-        commentId: data.commentId,
+        commentId: data.commentId ?? null,
       },
     });
   }

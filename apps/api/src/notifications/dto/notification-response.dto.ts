@@ -16,7 +16,7 @@ export class NotificationResponseDto {
   @ApiProperty({ format: 'uuid' })
   declare postId: string;
 
-  @ApiProperty({ format: 'uuid' })
+  @ApiProperty({ format: 'uuid', nullable: true })
   declare commentId: string;
 
   @ApiProperty({ description: '알림 생성 시간' })

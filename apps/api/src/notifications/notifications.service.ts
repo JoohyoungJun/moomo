@@ -36,6 +36,21 @@ export class NotificationsService {
     });
   }
 
+  async createLikeNotification(data: {
+    postAuthorId: string;
+    likeAuthorId: string;
+    likeAuthorNickname: string;
+    postTitle: string;
+    postId: string;
+  }) {
+    return this.notificationsRepository.createNotification({
+      userId: data.postAuthorId,
+      type: NOTIFICATION_TYPES.LIKE_ON_POST,
+      message: `${data.likeAuthorNickname} 님이 '${data.postTitle}' 게시글을 좋아합니다.`,
+      postId: data.postId,
+    });
+  }
+
   async findAllNotifications(userId: string, query: PaginationQueryDto) {
     const { page, pageSize, skip, take } = getPaginationParams(query);
 
