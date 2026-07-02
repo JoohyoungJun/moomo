@@ -1,0 +1,138 @@
+import { PrismaService } from '@/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
+import {
+  CreatePostsRequestDto,
+  UpdatePostsRequestDto,
+} from './dto/posts-request.dto';
+
+@Injectable()
+export class PostsRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  createPost(postData: CreatePostsRequestDto, authorId: string) {
+    return this.prisma.post.create({
+      data: {
+        title: postData.title,
+        content: postData.content,
+        authorId,
+      },
+    });
+  }
+
+  async findAllPosts(skip: number, take: number, search?: string) {
+    const where = search
+      ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as const } },
+            { content: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : undefined;
+
+    const [items, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+          author: {
+            select: {
+              nickname: true,
+            },
+          },
+        },
+      }),
+      this.prisma.post.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
+  findPostById(postId: string) {
+    return this.prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
+        author: {
+          select: {
+            nickname: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findPostsByAuthorId(authorId: string, skip: number, take: number) {
+    const [items, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { authorId },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+        },
+      }),
+      this.prisma.post.count({ where: { authorId } }),
+    ]);
+
+    return { items, total };
+  }
+
+  findLikeByUserAndPost(userId: string, postId: string) {
+    return this.prisma.like.findUnique({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+  }
+
+  async findLikedPostIdsByUser(userId: string, postIds: string[]) {
+    if (postIds.length === 0) {
+      return [];
+    }
+
+    const likes = await this.prisma.like.findMany({
+      where: {
+        userId,
+        postId: { in: postIds },
+      },
+      select: { postId: true },
+    });
+
+    return likes.map((like) => like.postId);
+  }
+
+  updatePost(postId: string, postData: UpdatePostsRequestDto) {
+    return this.prisma.post.update({
+      where: { id: postId },
+      data: {
+        title: postData.title,
+        content: postData.content,
+      },
+    });
+  }
+
+  deletePost(postId: string) {
+    return this.prisma.post.delete({
+      where: { id: postId },
+    });
+  }
+}

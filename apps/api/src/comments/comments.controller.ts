@@ -1,0 +1,121 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { CommentsService } from './comments.service';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  CreateCommentsResponseDto,
+  UpdateCommentsResponseDto,
+} from './dto/comments-response.dto';
+import { ApiSuccessResponse } from '@/common/decorators/api-success-response.decorator';
+import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
+import {
+  COMMENTS_ERRORS,
+  COMMON_ERRORS,
+  POSTS_ERRORS,
+} from '@/common/constants/errors';
+import { CommentsRequestDto } from './dto/comments-request.dto';
+import type { Request } from 'express';
+import { JwtAccessUser } from '@/auth/jwt/types';
+import { JwtAccessGuard } from '@/auth/jwt/jwt-access.guard';
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
+
+@ApiTags('comments')
+@Controller('/posts/:postId/comments')
+export class CommentsController {
+  constructor(private readonly commentsService: CommentsService) {}
+
+  @ApiOperation({ summary: '댓글 생성' })
+  @ApiSuccessResponse(HttpStatus.CREATED, CreateCommentsResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @Post()
+  createComment(
+    @Param('postId') postId: string,
+    @Body() body: CommentsRequestDto,
+    @Req() req: Request & { user: JwtAccessUser },
+  ) {
+    return this.commentsService.createComment(
+      postId,
+      body,
+      req.user.id,
+      req.user.nickname,
+    );
+  }
+
+  @ApiOperation({ summary: '댓글 목록 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, [CreateCommentsResponseDto])
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(POSTS_ERRORS.POST_NOT_FOUND)
+  @Get()
+  getAllComments(
+    @Param('postId') postId: string,
+    @Query() query: PaginationQueryDto,
+  ) {
+    return this.commentsService.getAllComments(postId, query);
+  }
+
+  @ApiOperation({ summary: '댓글 수정' })
+  @ApiSuccessResponse(HttpStatus.OK, UpdateCommentsResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    COMMENTS_ERRORS.COMMENT_UPDATE_EMPTY,
+    COMMENTS_ERRORS.COMMENT_POST_MISMATCH,
+  )
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(COMMENTS_ERRORS.COMMENT_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(':commentId')
+  updateComment(
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Body() body: CommentsRequestDto,
+    @Req() req: Request & { user: JwtAccessUser },
+  ) {
+    return this.commentsService.updateComment(
+      postId,
+      req.user.id,
+      commentId,
+      body,
+    );
+  }
+
+  @ApiOperation({ summary: '댓글 삭제' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: '댓글 삭제 성공' })
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    COMMENTS_ERRORS.COMMENT_NOT_FOUND,
+    COMMENTS_ERRORS.COMMENT_POST_MISMATCH,
+  )
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':commentId')
+  deleteComment(
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Req() req: Request & { user: JwtAccessUser },
+  ) {
+    return this.commentsService.deleteComment(postId, req.user.id, commentId);
+  }
+}
