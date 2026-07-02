@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
-import * as styles from './user-menu.css';
+import * as styles from './UserMenu.css';
 
 type Props = {
   nickname: string;

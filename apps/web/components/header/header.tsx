@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { AuthSection } from './auth-section';
-import * as styles from './header.css';
+import { AuthSection } from './AuthSection';
+import * as styles from './Header.css';
 
 export function Header() {
   return (

@@ -1,4 +1,4 @@
-import * as styles from './landing-page.css';
+import * as styles from './LandingPage.css';
 
 const features = [
   {
