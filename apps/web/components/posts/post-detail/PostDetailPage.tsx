@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import * as styles from './PostDetailPage.css';
@@ -68,6 +68,8 @@ export default function PostDetailPage() {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
 
+  const router = useRouter();
+
   const { data: me } = useQuery({
     queryKey: ['me'],
     queryFn: () => apiFetch<Me>('/users/me'),
@@ -84,6 +86,8 @@ export default function PostDetailPage() {
     queryFn: () => apiFetch<Post>(`/posts/${postId}`),
     enabled: Boolean(postId),
   });
+
+  const isOwner = me?.id === post?.authorId;
 
   const {
     data: commentsData,
@@ -123,6 +127,23 @@ export default function PostDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => apiFetch(`/posts/${postId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['me', 'posts'] });
+      router.push('/posts');
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
+  const handleDelete = () => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    deleteMutation.mutate();
+  };
 
   const handleLike = () => {
     if (!me) {
@@ -183,6 +204,26 @@ export default function PostDetailPage() {
           <span>{post.authorNickname}</span>
           <span>·</span>
           <time>{formatDate(post.createdAt)}</time>
+
+          {isOwner && (
+            <>
+              <span>·</span>
+              <Link
+                href={`/posts/${postId}/edit`}
+                className={styles.ownerAction}
+              >
+                수정
+              </Link>
+              <button
+                type="button"
+                className={styles.ownerActionDanger}
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+              >
+                삭제
+              </button>
+            </>
+          )}
         </div>
 
         <p className={styles.content}>{post.content}</p>

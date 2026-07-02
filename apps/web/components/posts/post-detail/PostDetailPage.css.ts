@@ -41,6 +41,25 @@ export const meta = style({
   color: colors.textMuted,
 });
 
+export const ownerAction = style({
+  fontSize: '14px',
+  color: colors.primary,
+  textDecoration: 'none',
+
+  ':hover': {
+    textDecoration: 'underline',
+  },
+});
+
+export const ownerActionDanger = style({
+  border: 'none',
+  padding: 0,
+  background: 'none',
+  fontSize: '14px',
+  color: '#dc2626',
+  cursor: 'pointer',
+});
+
 export const content = style({
   margin: '0 0 20px',
   fontSize: '16px',
