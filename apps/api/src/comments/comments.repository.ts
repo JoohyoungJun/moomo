@@ -22,7 +22,7 @@ export class CommentsRepository {
         where: { postId },
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
         include: {
           author: {
             select: {
@@ -56,7 +56,7 @@ export class CommentsRepository {
         where: { authorId },
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
         include: {
           post: {
             select: {
