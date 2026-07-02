@@ -29,7 +29,7 @@ import {
   PostListResponseDto,
   PostsResponseDto,
 } from './dto/posts-response.dto';
-import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
+import { PostsQueryDto } from './dto/posts-query.dto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -59,7 +59,7 @@ export class PostsController {
   @HttpCode(HttpStatus.OK)
   @Get()
   getAllPosts(
-    @Query() query: PaginationQueryDto,
+    @Query() query: PostsQueryDto,
     @Req() req: Request & { user: JwtAccessUser | null },
   ) {
     return this.postsService.getAllPosts(query, req.user?.id);

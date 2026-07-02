@@ -11,7 +11,6 @@ import {
   POSTS_MAX_LENGTH_TITLE,
   POSTS_MIN_LENGTH,
 } from './constants';
-import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 import {
   buildPaginationResponse,
   getPaginationParams,
@@ -20,6 +19,7 @@ import {
   PostsResponseDto,
   UpdatedPostsResponseDto,
 } from './dto/posts-response.dto';
+import { PostsQueryDto } from './dto/posts-query.dto';
 
 @Injectable()
 export class PostsService {
@@ -55,12 +55,15 @@ export class PostsService {
     };
   }
 
-  async getAllPosts(query: PaginationQueryDto, userId?: string) {
+  async getAllPosts(query: PostsQueryDto, userId?: string) {
     const { page, pageSize, skip, take } = getPaginationParams(query);
+
+    const search = query.search?.trim() || undefined;
 
     const { items, total } = await this.postsRepository.findAllPosts(
       skip,
       take,
+      search,
     );
 
     const likedPostIds =

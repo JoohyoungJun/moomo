@@ -19,9 +19,19 @@ export class PostsRepository {
     });
   }
 
-  async findAllPosts(skip: number, take: number) {
+  async findAllPosts(skip: number, take: number, search?: string) {
+    const where = search
+      ? {
+          OR: [
+            { title: { contains: search, mode: 'insensitive' as const } },
+            { content: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : undefined;
+
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
+        where,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
