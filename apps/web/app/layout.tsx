@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { Header } from '@/components/header/header';
 import '@/styles/global.css';
+import * as styles from './layout.css';
 
 export const metadata: Metadata = {
   title: 'Moomo',
@@ -18,7 +19,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <Header />
-          {children}
+          <div className={styles.content}>{children}</div>
         </Providers>
       </body>
     </html>

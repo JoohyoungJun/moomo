@@ -6,14 +6,17 @@ export const page = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
   boxSizing: 'border-box',
-  padding: '16px',
+  padding: '16px 24px',
   textAlign: 'center',
 });
 
 export const badge = style({
   display: 'inline-block',
-  marginBottom: '16px',
+  marginBottom: '12px',
   padding: '6px 12px',
   borderRadius: '999px',
   backgroundColor: '#eff6ff',
@@ -23,17 +26,17 @@ export const badge = style({
 });
 
 export const title = style({
-  margin: '0 0 16px',
-  fontSize: '48px',
+  margin: '0 0 12px',
+  fontSize: '44px',
   fontWeight: 800,
   letterSpacing: '-0.03em',
   color: colors.text,
 });
 
 export const description = style({
-  margin: '0 0 48px',
+  margin: '0 0 24px',
   maxWidth: '480px',
-  fontSize: '18px',
+  fontSize: '17px',
   lineHeight: 1.6,
   color: colors.textMuted,
 });
@@ -41,9 +44,10 @@ export const description = style({
 export const featureGrid = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: '16px',
+  gap: '12px',
   width: '100%',
   maxWidth: '720px',
+  flexShrink: 0,
 
   '@media': {
     'screen and (max-width: 768px)': {
@@ -53,7 +57,7 @@ export const featureGrid = style({
 });
 
 export const featureCard = style({
-  padding: '24px',
+  padding: '20px',
   backgroundColor: colors.background,
   border: `1px solid ${colors.border}`,
   borderRadius: '12px',
