@@ -49,7 +49,7 @@ export class PostsRepository {
           },
         },
       }),
-      this.prisma.post.count(),
+      this.prisma.post.count({ where }),
     ]);
 
     return { items, total };

@@ -198,7 +198,7 @@ export default function PostDetailPage() {
           >
             {post.isLiked ? '♥' : '♡'} 좋아요 {post.likesCount}
           </button>
-          <span className={styles.meta}>댓글 {post.commentsCount}</span>
+          <span className={styles.actionStat}>댓글 {post.commentsCount}</span>
         </div>
       </article>
 

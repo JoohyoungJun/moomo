@@ -33,21 +33,71 @@ export const description = style({
   flexShrink: 0,
 });
 
-export const list = style({
+export const searchForm = style({
   display: 'flex',
-  flexDirection: 'column',
+  gap: '8px',
+  flexShrink: 0,
+});
+
+export const searchInput = style({
+  flex: 1,
+  height: '40px',
+  padding: '0 12px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '8px',
+  fontSize: '14px',
+  color: colors.text,
+  backgroundColor: colors.background,
+});
+
+export const searchButton = style({
+  height: '40px',
+  padding: '0 16px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '8px',
+  backgroundColor: colors.background,
+  color: colors.text,
+  fontSize: '14px',
+  cursor: 'pointer',
+  flexShrink: 0,
+
+  ':hover': {
+    backgroundColor: colors.surface,
+    borderColor: '#d1d5db',
+  },
+});
+
+export const searchResetButton = style({
+  height: '40px',
+  padding: '0 12px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '8px',
+  backgroundColor: colors.background,
+  color: colors.textMuted,
+  fontSize: '14px',
+  cursor: 'pointer',
+  flexShrink: 0,
+
+  ':hover': {
+    backgroundColor: colors.surface,
+    borderColor: '#d1d5db',
+  },
+});
+
+export const list = style({
+  display: 'grid',
+  gridTemplateRows: 'repeat(4, 1fr)',
   gap: '8px',
   flex: 1,
   minHeight: 0,
-  overflow: 'hidden',
 });
 
 export const card = style({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
-  flex: 1,
   minHeight: 0,
+  overflow: 'hidden',
   padding: '12px 16px',
   border: `1px solid ${colors.border}`,
   borderRadius: '12px',
