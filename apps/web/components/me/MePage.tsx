@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,15 +15,56 @@ type Me = {
   updatedAt: string;
 };
 
-type MeTab = 'profile' | 'password';
+type PaginatedResponse<T> = {
+  items: T[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+};
+
+type MyPost = {
+  id: string;
+  title: string;
+  authorId: string;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: string;
+};
+
+type MyComment = {
+  id: string;
+  content: string;
+  postId: string;
+  postTitle: string;
+  createdAt: string;
+};
+
+type MeTab = 'profile' | 'password' | 'posts' | 'comments';
+
+const PAGE_SIZE = 4;
 
 const NAV_ITEMS: { id: MeTab; label: string }[] = [
   { id: 'profile', label: '내 정보' },
   { id: 'password', label: '비밀번호 변경' },
+  { id: 'posts', label: '내가 쓴 게시글' },
+  { id: 'comments', label: '내가 쓴 댓글' },
 ];
 
 function isMeTab(value: string | null): value is MeTab {
-  return value === 'profile' || value === 'password';
+  return ['profile', 'password', 'posts', 'comments'].includes(value ?? '');
+}
+
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
 }
 
 export default function MePage() {
@@ -31,15 +73,46 @@ export default function MePage() {
   const queryClient = useQueryClient();
   const tabParam = searchParams.get('tab');
   const activeTab: MeTab = isMeTab(tabParam) ? tabParam : 'profile';
+  const pageParam = Number(searchParams.get('page') ?? '1');
+  const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
   const {
     data: me,
-    isLoading,
-    isError,
-    error,
+    isLoading: isMeLoading,
+    isError: isMeError,
+    error: meError,
   } = useQuery({
     queryKey: ['me'],
     queryFn: () => apiFetch<Me>('/users/me'),
+    enabled: activeTab === 'profile' || activeTab === 'password',
+  });
+
+  const {
+    data: myPostsData,
+    isLoading: isPostsLoading,
+    isError: isPostsError,
+    error: postsError,
+  } = useQuery({
+    queryKey: ['me', 'posts', currentPage],
+    queryFn: () =>
+      apiFetch<PaginatedResponse<MyPost>>(
+        `/users/me/posts?page=${currentPage}&pageSize=${PAGE_SIZE}`,
+      ),
+    enabled: activeTab === 'posts',
+  });
+
+  const {
+    data: myCommentsData,
+    isLoading: isCommentsLoading,
+    isError: isCommentsError,
+    error: commentsError,
+  } = useQuery({
+    queryKey: ['me', 'comments', currentPage],
+    queryFn: () =>
+      apiFetch<PaginatedResponse<MyComment>>(
+        `/users/me/comments?page=${currentPage}&pageSize=${PAGE_SIZE}`,
+      ),
+    enabled: activeTab === 'comments',
   });
 
   const [email, setEmail] = useState('');
@@ -77,8 +150,15 @@ export default function MePage() {
   });
 
   const handleTabChange = (tab: MeTab) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     params.set('tab', tab);
+    params.set('page', '1');
+    router.push(`/me?${params.toString()}`);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(nextPage));
     router.push(`/me?${params.toString()}`);
   };
 
@@ -91,6 +171,11 @@ export default function MePage() {
     event.preventDefault();
     changePasswordMutation.mutate({ currentPassword, newPassword });
   };
+
+  const myPosts = myPostsData?.items ?? [];
+  const myPostsMeta = myPostsData?.meta;
+  const myComments = myCommentsData?.items ?? [];
+  const myCommentsMeta = myCommentsData?.meta;
 
   return (
     <main className={styles.page}>
@@ -112,12 +197,14 @@ export default function MePage() {
           </nav>
 
           <div className={styles.content}>
-            {isLoading && (
+            {activeTab === 'profile' && isMeLoading && (
               <p className={styles.state}>내 정보를 불러오는 중...</p>
             )}
-            {isError && <p className={styles.error}>{error.message}</p>}
+            {activeTab === 'profile' && isMeError && (
+              <p className={styles.error}>{meError.message}</p>
+            )}
 
-            {!isLoading && !isError && me && activeTab === 'profile' && (
+            {!isMeLoading && !isMeError && me && activeTab === 'profile' && (
               <>
                 <h1 className={styles.sectionTitle}>내 정보</h1>
                 <p className={styles.sectionDescription}>
@@ -175,7 +262,14 @@ export default function MePage() {
               </>
             )}
 
-            {!isLoading && !isError && me && activeTab === 'password' && (
+            {activeTab === 'password' && isMeLoading && (
+              <p className={styles.state}>내 정보를 불러오는 중...</p>
+            )}
+            {activeTab === 'password' && isMeError && (
+              <p className={styles.error}>{meError.message}</p>
+            )}
+
+            {!isMeLoading && !isMeError && me && activeTab === 'password' && (
               <>
                 <h1 className={styles.sectionTitle}>비밀번호 변경</h1>
                 <p className={styles.sectionDescription}>
@@ -230,6 +324,143 @@ export default function MePage() {
                       : '비밀번호 변경'}
                   </button>
                 </form>
+              </>
+            )}
+
+            {activeTab === 'posts' && (
+              <>
+                <h1 className={styles.sectionTitle}>내가 쓴 게시글</h1>
+
+                {isPostsLoading && (
+                  <p className={styles.state}>게시글을 불러오는 중...</p>
+                )}
+                {isPostsError && (
+                  <p className={styles.error}>{postsError.message}</p>
+                )}
+
+                {!isPostsLoading && !isPostsError && myPosts.length === 0 && (
+                  <p className={styles.state}>작성한 게시글이 없습니다.</p>
+                )}
+
+                {!isPostsLoading && !isPostsError && myPosts.length > 0 && (
+                  <>
+                    <div className={styles.list}>
+                      {myPosts.map((post) => (
+                        <Link
+                          key={post.id}
+                          href={`/posts/${post.id}`}
+                          className={styles.listItem}
+                        >
+                          <h2 className={styles.listItemTitle}>{post.title}</h2>
+
+                          <div className={styles.listItemMeta}>
+                            <time>{formatDate(post.createdAt)}</time>
+                          </div>
+
+                          <div className={styles.listItemStats}>
+                            <span>좋아요 {post.likesCount}</span>
+                            <span>댓글 {post.commentsCount}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {myPostsMeta && myPostsMeta.totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        <button
+                          type="button"
+                          className={styles.pageButton}
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={!myPostsMeta.hasPrev}
+                        >
+                          이전
+                        </button>
+                        <span className={styles.pageInfo}>
+                          {myPostsMeta.page} / {myPostsMeta.totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          className={styles.pageButton}
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={!myPostsMeta.hasNext}
+                        >
+                          다음
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {activeTab === 'comments' && (
+              <>
+                <h1 className={styles.sectionTitle}>내가 쓴 댓글</h1>
+
+                {isCommentsLoading && (
+                  <p className={styles.state}>댓글을 불러오는 중...</p>
+                )}
+                {isCommentsError && (
+                  <p className={styles.error}>{commentsError.message}</p>
+                )}
+
+                {!isCommentsLoading &&
+                  !isCommentsError &&
+                  myComments.length === 0 && (
+                    <p className={styles.state}>작성한 댓글이 없습니다.</p>
+                  )}
+
+                {!isCommentsLoading &&
+                  !isCommentsError &&
+                  myComments.length > 0 && (
+                    <>
+                      <div className={styles.list}>
+                        {myComments.map((comment) => (
+                          <Link
+                            key={comment.id}
+                            href={`/posts/${comment.postId}`}
+                            className={styles.listItem}
+                          >
+                            <h2 className={styles.listItemTitle}>
+                              {comment.postTitle}
+                            </h2>
+
+                            <p className={styles.listItemContent}>
+                              {comment.content}
+                            </p>
+
+                            <div className={styles.listItemMeta}>
+                              <time>{formatDate(comment.createdAt)}</time>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+
+                      {myCommentsMeta && myCommentsMeta.totalPages > 1 && (
+                        <div className={styles.pagination}>
+                          <button
+                            type="button"
+                            className={styles.pageButton}
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={!myCommentsMeta.hasPrev}
+                          >
+                            이전
+                          </button>
+                          <span className={styles.pageInfo}>
+                            {myCommentsMeta.page} / {myCommentsMeta.totalPages}
+                          </span>
+                          <button
+                            type="button"
+                            className={styles.pageButton}
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={!myCommentsMeta.hasNext}
+                          >
+                            다음
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
               </>
             )}
           </div>

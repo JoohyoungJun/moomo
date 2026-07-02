@@ -164,3 +164,102 @@ export const success = style({
   fontSize: '14px',
   color: '#16a34a',
 });
+
+export const list = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  marginTop: '8px',
+});
+
+export const listItem = style({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  padding: '12px 16px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '12px',
+  backgroundColor: colors.background,
+  textDecoration: 'none',
+  transition: 'background-color 0.15s ease, border-color 0.15s ease',
+
+  ':hover': {
+    backgroundColor: colors.surface,
+    borderColor: '#d1d5db',
+  },
+});
+
+export const listItemTitle = style({
+  margin: '0 0 4px',
+  fontSize: '16px',
+  fontWeight: 600,
+  color: colors.text,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const listItemContent = style({
+  margin: '0 0 4px',
+  fontSize: '14px',
+  lineHeight: 1.5,
+  color: colors.textMuted,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const listItemMeta = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  marginBottom: '4px',
+  fontSize: '13px',
+  color: colors.textMuted,
+});
+
+export const listItemStats = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  fontSize: '13px',
+  color: colors.textMuted,
+});
+
+export const pagination = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '12px',
+  marginTop: '16px',
+});
+
+export const pageButton = style({
+  height: '36px',
+  minWidth: '64px',
+  padding: '0 12px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '8px',
+  backgroundColor: colors.background,
+  color: colors.text,
+  fontSize: '14px',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s ease, border-color 0.15s ease',
+
+  ':hover': {
+    backgroundColor: colors.surface,
+    borderColor: '#d1d5db',
+  },
+
+  ':disabled': {
+    opacity: 0.45,
+    cursor: 'not-allowed',
+  },
+});
+
+export const pageInfo = style({
+  minWidth: '64px',
+  textAlign: 'center',
+  fontSize: '14px',
+  color: colors.textMuted,
+});
