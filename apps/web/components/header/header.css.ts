@@ -25,17 +25,26 @@ export const inner = style({
 });
 
 export const logo = style({
+  flexShrink: 0,
   fontSize: '20px',
   fontWeight: 700,
   color: colors.text,
   textDecoration: 'none',
   letterSpacing: '-0.02em',
+
+  ':hover': {
+    color: colors.primary,
+  },
 });
 
 export const nav = style({
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'center',
   gap: '8px',
+  flex: 1,
+  minWidth: 0,
+  flexWrap: 'nowrap',
 });
 
 export const navLink = style({
@@ -46,6 +55,9 @@ export const navLink = style({
   color: colors.textMuted,
   textDecoration: 'none',
   transition: 'background-color 0.15s ease, color 0.15s ease',
+
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
 
   ':hover': {
     backgroundColor: colors.surface,
@@ -68,5 +80,6 @@ export const authGroup = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
+  flexShrink: 0,
   overflow: 'visible',
 });

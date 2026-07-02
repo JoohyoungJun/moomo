@@ -3,6 +3,7 @@ import { globalStyle } from '@vanilla-extract/css';
 globalStyle('body', {
   margin: 0,
   minHeight: '100svh',
+  overflowX: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   fontFamily:
