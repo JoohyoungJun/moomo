@@ -13,7 +13,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import { SignInRequestDto } from './dto/sign-in-request.dto';
-import { cookieOptions, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, SALT_ROUNDS } from './constants/auth.constants';
+import {
+  ACCESS_TOKEN_MAX_AGE,
+  cookieOptions,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  REFRESH_TOKEN_MAX_AGE,
+  SALT_ROUNDS,
+} from './constants/auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +29,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async createUser(userData: CreateUserConfirmPasswordDto): Promise<UserResponseDto> {
+  async createUser(
+    userData: CreateUserConfirmPasswordDto,
+  ): Promise<UserResponseDto> {
     if (userData.password !== userData.passwordConfirm) {
       throw new AppException(AUTH_ERRORS.PASSWORD_MISMATCH);
     }
@@ -123,12 +132,12 @@ export class AuthService {
   setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
     res.cookie('accessToken', accessToken, {
       ...cookieOptions,
-      maxAge: 1000 * 60 * 15,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
 
     res.cookie('refreshToken', refreshToken, {
       ...cookieOptions,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
   }
 
