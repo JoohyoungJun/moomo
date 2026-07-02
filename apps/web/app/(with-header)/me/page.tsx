@@ -1,3 +1,10 @@
-export default function MePage() {
-  return <main>마이페이지</main>
+import { AuthGuard } from '@/components/auth/auth-guard/AuthGuard';
+import MePage from '@/components/me/MePage';
+
+export default function Page() {
+  return (
+    <AuthGuard>
+      <MePage />
+    </AuthGuard>
+  );
 }
