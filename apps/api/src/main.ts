@@ -1,4 +1,16 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
+
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+const envFile = resolve(process.cwd(), `.env.${nodeEnv}`);
+
+if (existsSync(envFile)) {
+  config({ path: envFile });
+}
+
+config();
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
