@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import { Providers } from './providers';
-import { Header } from '@/components/header/header';
 import '@/styles/global.css';
-import * as styles from './layout.css';
 
 export const metadata: Metadata = {
   title: 'Moomo',
@@ -17,10 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <Providers>
-          <Header />
-          <div className={styles.content}>{children}</div>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

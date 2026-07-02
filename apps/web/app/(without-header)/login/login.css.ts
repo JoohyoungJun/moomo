@@ -2,16 +2,16 @@ import { style } from '@vanilla-extract/css';
 import { colors } from '@/styles/theme.css';
 
 export const page = style({
-  minHeight: 'calc(100vh - 64px)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '48px 24px',
+  width: '100%',
+  flex: 'none',
+  padding: 0,
+  margin: 0,
+  maxWidth: 'none',
+  overflow: 'visible',
 });
 
 export const card = style({
   width: '100%',
-  maxWidth: '400px',
   padding: '32px',
   backgroundColor: colors.background,
   border: `1px solid ${colors.border}`,
