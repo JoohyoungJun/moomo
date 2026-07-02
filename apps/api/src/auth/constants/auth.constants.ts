@@ -1,9 +1,9 @@
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: (process.env.NODE_ENV === 'production' ? 'none' : 'lax') as
-    | 'lax'
-    | 'none',
+  secure: isProduction,
+  sameSite: isProduction ? ('none' as const) : ('lax' as const),
 };
 
 export const SALT_ROUNDS = 10;
