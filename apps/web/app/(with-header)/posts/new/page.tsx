@@ -1,3 +1,10 @@
-export default function NewPostPage() {
-  return <main>게시글 작성 페이지</main>
+import { AuthGuard } from '@/components/auth/auth-guard/AuthGuard';
+import NewPostPage from '@/components/posts/new-post/NewPostPage';
+
+export default function Page() {
+  return (
+    <AuthGuard>
+      <NewPostPage />
+    </AuthGuard>
+  );
 }

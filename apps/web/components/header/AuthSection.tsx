@@ -3,9 +3,9 @@
 import { apiFetch } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 
-import * as styles from './header.css';
-import { UserMenu } from './user-menu';
-import { NotificationBell } from './notification-bell';
+import * as styles from './Header.css';
+import { UserMenu } from './UserMenu';
+import { NotificationBell } from './NotificationBell';
 import Link from 'next/link';
 
 type Me = {

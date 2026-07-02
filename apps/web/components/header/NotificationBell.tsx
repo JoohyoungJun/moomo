@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
-import * as styles from './notification-bell.css';
+import * as styles from './NotificationBell.css';
 
 type Notification = {
   id: string;
