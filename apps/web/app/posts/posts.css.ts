@@ -4,18 +4,24 @@ import { colors } from '@/styles/theme.css';
 export const page = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '16px',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
+  gap: '8px',
+  boxSizing: 'border-box',
+  padding: '16px 24px',
 });
 
 export const header = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  flexShrink: 0,
 });
 
 export const title = style({
   margin: 0,
-  fontSize: '24px',
+  fontSize: '22px',
   fontWeight: 700,
   color: colors.text,
 });
@@ -24,17 +30,25 @@ export const description = style({
   margin: 0,
   fontSize: '14px',
   color: colors.textMuted,
+  flexShrink: 0,
 });
 
 export const list = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: '8px',
+  flex: 1,
+  minHeight: 0,
+  overflow: 'hidden',
 });
 
 export const card = style({
-  display: 'block',
-  padding: '16px',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  flex: 1,
+  minHeight: 0,
+  padding: '12px 16px',
   border: `1px solid ${colors.border}`,
   borderRadius: '12px',
   backgroundColor: colors.background,
@@ -48,17 +62,20 @@ export const card = style({
 });
 
 export const cardTitle = style({
-  margin: '0 0 8px',
-  fontSize: '17px',
+  margin: '0 0 4px',
+  fontSize: '16px',
   fontWeight: 600,
   color: colors.text,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 export const cardMeta = style({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  marginBottom: '10px',
+  marginBottom: '4px',
   fontSize: '13px',
   color: colors.textMuted,
 });
@@ -73,8 +90,10 @@ export const cardStats = style({
 
 export const state = style({
   margin: 0,
-  padding: '24px 0',
-  textAlign: 'center',
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   color: colors.textMuted,
   fontSize: '14px',
 });
@@ -84,7 +103,7 @@ export const pagination = style({
   alignItems: 'center',
   justifyContent: 'center',
   gap: '12px',
-  paddingTop: '8px',
+  flexShrink: 0,
 });
 
 export const pageButton = style({

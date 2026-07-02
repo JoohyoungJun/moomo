@@ -13,8 +13,12 @@ globalStyle('body', {
 
 globalStyle('main', {
   flex: 1,
+  minHeight: 0,
   width: '100%',
   maxWidth: '1100px',
   margin: '0 auto',
   padding: '32px 24px',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'auto',
 });
