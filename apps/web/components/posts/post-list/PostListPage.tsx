@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { FormEvent, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +17,8 @@ type PostListItem = {
   isLiked: boolean;
   createdAt: string;
 };
+
+const PAGE_SIZE = 4;
 
 type PostListResponse = {
   items: PostListItem[];
@@ -37,16 +40,68 @@ function formatDate(date: string) {
   });
 }
 
+function PostSearchForm({
+  searchKeyword,
+  onSearch,
+  onReset,
+}: {
+  searchKeyword: string;
+  onSearch: (value: string) => void;
+  onReset: () => void;
+}) {
+  const [searchInput, setSearchInput] = useState(searchKeyword);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSearch(searchInput.trim());
+  };
+
+  return (
+    <form className={styles.searchForm} onSubmit={handleSubmit}>
+      <input
+        className={styles.searchInput}
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        placeholder="제목·내용 검색"
+        maxLength={30}
+      />
+      <button type="submit" className={styles.searchButton}>
+        검색
+      </button>
+      {searchKeyword && (
+        <button
+          type="button"
+          className={styles.searchResetButton}
+          onClick={onReset}
+        >
+          초기화
+        </button>
+      )}
+    </form>
+  );
+}
+
 export default function PostListPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageParam = Number(searchParams.get('page') ?? '1');
   const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+  const searchKeyword = searchParams.get('search')?.trim() ?? '';
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['posts', currentPage],
-    queryFn: () =>
-      apiFetch<PostListResponse>(`/posts?page=${currentPage}&pageSize=4`),
+    queryKey: ['posts', currentPage, searchKeyword],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        pageSize: String(PAGE_SIZE),
+      });
+
+      if (searchKeyword) {
+        params.set('search', searchKeyword);
+      }
+
+      return apiFetch<PostListResponse>(`/posts?${params.toString()}`);
+    },
   });
 
   const posts = data?.items ?? [];
@@ -58,6 +113,21 @@ export default function PostListPage() {
     router.push(`/posts?${params.toString()}`);
   };
 
+  const handleSearch = (value: string) => {
+    const params = new URLSearchParams();
+
+    if (value) {
+      params.set('search', value);
+    }
+
+    params.set('page', '1');
+    router.push(`/posts?${params.toString()}`);
+  };
+
+  const handleSearchReset = () => {
+    router.push('/posts?page=1');
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.header}>
@@ -67,11 +137,22 @@ export default function PostListPage() {
         무인매장 운영 경험과 노하우를 나눠보세요.
       </p>
 
+      <PostSearchForm
+        key={searchKeyword}
+        searchKeyword={searchKeyword}
+        onSearch={handleSearch}
+        onReset={handleSearchReset}
+      />
+
       {isLoading && <p className={styles.state}>게시글을 불러오는 중...</p>}
       {isError && <p className={styles.state}>{error.message}</p>}
 
       {!isLoading && !isError && posts.length === 0 && (
-        <p className={styles.state}>아직 게시글이 없습니다.</p>
+        <p className={styles.state}>
+          {searchKeyword
+            ? `"${searchKeyword}" 검색 결과가 없습니다.`
+            : '아직 게시글이 없습니다.'}
+        </p>
       )}
 
       {!isLoading && !isError && posts.length > 0 && (

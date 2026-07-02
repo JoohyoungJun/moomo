@@ -55,6 +55,14 @@ export const actions = style({
   gap: '12px',
 });
 
+export const actionStat = style({
+  display: 'flex',
+  alignItems: 'center',
+  height: '36px',
+  fontSize: '14px',
+  color: colors.textMuted,
+});
+
 export const likeButton = style({
   display: 'inline-flex',
   alignItems: 'center',
