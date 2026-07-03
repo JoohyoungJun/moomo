@@ -5,6 +5,7 @@ export const colors = {
   border: '#e5e7eb',
   background: '#ffffff',
   surface: '#f8f9fb',
+  danger: '#dc2626',
 };
 
 export const layout = {

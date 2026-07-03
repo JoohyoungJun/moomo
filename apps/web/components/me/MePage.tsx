@@ -5,6 +5,7 @@ import { apiFetch } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
+import AccountDeleteModal from '@/components/modal/account-delete-modal/AccountDeleteModal';
 import * as styles from './MePage.css';
 
 type Me = {
@@ -44,7 +45,7 @@ type MyComment = {
   createdAt: string;
 };
 
-type MeTab = 'profile' | 'password' | 'posts' | 'comments';
+type MeTab = 'profile' | 'password' | 'posts' | 'comments' | 'account-delete';
 
 const PAGE_SIZE = 4;
 
@@ -53,10 +54,17 @@ const NAV_ITEMS: { id: MeTab; label: string }[] = [
   { id: 'password', label: '비밀번호 변경' },
   { id: 'posts', label: '내가 쓴 게시글' },
   { id: 'comments', label: '내가 쓴 댓글' },
+  { id: 'account-delete', label: '회원탈퇴' },
 ];
 
 function isMeTab(value: string | null): value is MeTab {
-  return ['profile', 'password', 'posts', 'comments'].includes(value ?? '');
+  return [
+    'profile',
+    'password',
+    'posts',
+    'comments',
+    'account-delete',
+  ].includes(value ?? '');
 }
 
 function formatDate(date: string) {
@@ -75,6 +83,9 @@ export default function MePage() {
   const activeTab: MeTab = isMeTab(tabParam) ? tabParam : 'profile';
   const pageParam = Number(searchParams.get('page') ?? '1');
   const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+
+  const [isAccountDeleteModalOpen, setIsAccountDeleteModalOpen] =
+    useState(false);
 
   const {
     data: me,
@@ -149,6 +160,24 @@ export default function MePage() {
     },
   });
 
+  const deleteAccountMutation = useMutation({
+    mutationFn: (password: string) =>
+      apiFetch('/users/me', {
+        method: 'DELETE',
+        body: JSON.stringify({ password }),
+      }),
+    onSuccess: () => {
+      setIsAccountDeleteModalOpen(false);
+      router.push('/');
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      queryClient.clear();
+      alert('회원탈퇴가 완료되었습니다.');
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
   const handleTabChange = (tab: MeTab) => {
     const params = new URLSearchParams();
     params.set('tab', tab);
@@ -176,6 +205,18 @@ export default function MePage() {
   const myPostsMeta = myPostsData?.meta;
   const myComments = myCommentsData?.items ?? [];
   const myCommentsMeta = myCommentsData?.meta;
+
+  const handleAccountDeleteOpen = () => {
+    setIsAccountDeleteModalOpen(true);
+  };
+
+  const handleAccountDeleteClose = () => {
+    setIsAccountDeleteModalOpen(false);
+  };
+
+  const handleAccountDeleteSubmit = (password: string) => {
+    deleteAccountMutation.mutate(password);
+  };
 
   return (
     <main className={styles.page}>
@@ -463,9 +504,38 @@ export default function MePage() {
                   )}
               </>
             )}
+            {activeTab === 'account-delete' && (
+              <>
+                <h1 className={styles.sectionTitle}>회원탈퇴</h1>
+                <p className={styles.sectionDescription}>
+                  탈퇴 시 계정과 작성한 게시글, 댓글 등 모든 데이터가
+                  삭제됩니다.
+                  <br /> 이 작업은 되돌릴 수 없습니다.
+                </p>
+                <button
+                  type="button"
+                  className={styles.deleteAccountButton}
+                  onClick={handleAccountDeleteOpen}
+                >
+                  회원탈퇴
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      <AccountDeleteModal
+        open={isAccountDeleteModalOpen}
+        onClose={handleAccountDeleteClose}
+        onSubmit={handleAccountDeleteSubmit}
+        isPending={deleteAccountMutation.isPending}
+        error={
+          deleteAccountMutation.isError
+            ? deleteAccountMutation.error.message
+            : undefined
+        }
+      />
     </main>
   );
 }
