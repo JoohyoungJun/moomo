@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import UpdateCommentModal from '@/components/modal/update-comment-modal/UpdateCommentModal';
 import * as styles from './PostDetailPage.css';
+import DeleteModal from '@/components/modal/delete-modal/DeleteModal';
 
 type Post = {
   id: string;
@@ -58,6 +59,10 @@ type Me = {
   id: string;
 };
 
+export type DeleteTarget =
+  | { type: 'post' }
+  | { type: 'comment'; commentId: string };
+
 const PAGE_SIZE = 10;
 
 function formatDate(value: string) {
@@ -77,6 +82,7 @@ export default function PostDetailPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [editingComment, setEditingComment] = useState<Comment | null>(null);
   const pageParam = Number(searchParams.get('page') ?? '1');
   const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
@@ -149,6 +155,8 @@ export default function PostDetailPage() {
   const deletePostMutation = useMutation({
     mutationFn: () => apiFetch(`/posts/${postId}`, { method: 'DELETE' }),
     onSuccess: () => {
+      setDeleteTarget(null);
+      alert('게시글이 삭제되었습니다.');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['me', 'posts'] });
       router.push('/posts');
@@ -171,9 +179,6 @@ export default function PostDetailPage() {
       });
       queryClient.invalidateQueries({ queryKey: ['me', 'comments'] });
     },
-    onError: (error) => {
-      alert(error.message);
-    },
   });
 
   const deleteCommentMutation = useMutation({
@@ -182,21 +187,52 @@ export default function PostDetailPage() {
         method: 'DELETE',
       }),
     onSuccess: () => {
+      setDeleteTarget(null);
+      alert('댓글이 삭제되었습니다.');
       queryClient.invalidateQueries({
         queryKey: ['comments', postId, currentPage],
       });
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['me', 'comments'] });
     },
     onError: (error) => {
       alert(error.message);
     },
   });
 
-  const handlePostDelete = () => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-    deletePostMutation.mutate();
+  const handleDeleteModalClose = () => {
+    setDeleteTarget(null);
   };
+
+  const handlePostDeleteOpen = () => {
+    setDeleteTarget({ type: 'post' });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.type === 'post') {
+      deletePostMutation.mutate();
+      return;
+    }
+
+    deleteCommentMutation.mutate(deleteTarget.commentId);
+  };
+
+  const isDeletePending =
+    deleteTarget?.type === 'post'
+      ? deletePostMutation.isPending
+      : deleteCommentMutation.isPending;
+
+  const deleteError =
+    deleteTarget?.type === 'post'
+      ? deletePostMutation.isError
+        ? deletePostMutation.error.message
+        : undefined
+      : deleteCommentMutation.isError
+        ? deleteCommentMutation.error.message
+        : undefined;
 
   const handleLike = () => {
     if (!me) {
@@ -242,10 +278,8 @@ export default function PostDetailPage() {
     );
   }
 
-  const handleCommentDelete = (commentId: string) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-
-    deleteCommentMutation.mutate(commentId);
+  const handleCommentDeleteOpen = (commentId: string) => {
+    setDeleteTarget({ type: 'comment', commentId });
   };
 
   const handleCommentUpdateOpen = (comment: Comment) => {
@@ -300,7 +334,7 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 className={styles.ownerActionDanger}
-                onClick={handlePostDelete}
+                onClick={handlePostDeleteOpen}
                 disabled={deletePostMutation.isPending}
               >
                 삭제
@@ -392,7 +426,7 @@ export default function PostDetailPage() {
                           <button
                             type="button"
                             className={styles.ownerActionDanger}
-                            onClick={() => handleCommentDelete(item.id)}
+                            onClick={() => handleCommentDeleteOpen(item.id)}
                           >
                             삭제
                           </button>
@@ -445,6 +479,16 @@ export default function PostDetailPage() {
             : undefined
         }
       />
+      {deleteTarget && (
+        <DeleteModal
+          open={true}
+          target={deleteTarget}
+          onClose={handleDeleteModalClose}
+          onSubmit={handleDeleteConfirm}
+          isPending={isDeletePending}
+          error={deleteError}
+        />
+      )}
     </main>
   );
 }
