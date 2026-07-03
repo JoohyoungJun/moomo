@@ -42,9 +42,13 @@ export const meta = style({
 });
 
 export const ownerAction = style({
-  fontSize: '14px',
+  fontSize: '12px',
   color: colors.primary,
   textDecoration: 'none',
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  cursor: 'pointer',
 
   ':hover': {
     textDecoration: 'underline',
@@ -55,7 +59,7 @@ export const ownerActionDanger = style({
   border: 'none',
   padding: 0,
   background: 'none',
-  fontSize: '14px',
+  fontSize: '12px',
   color: '#dc2626',
   cursor: 'pointer',
 });
@@ -204,6 +208,43 @@ export const state = style({
 
 export const loginHint = style({
   margin: 0,
+  fontSize: '14px',
+  color: colors.textMuted,
+});
+
+export const pagination = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '12px',
+});
+
+export const pageButton = style({
+  height: '36px',
+  minWidth: '64px',
+  padding: '0 12px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '8px',
+  backgroundColor: colors.background,
+  color: colors.text,
+  fontSize: '14px',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s ease, border-color 0.15s ease',
+
+  ':hover': {
+    backgroundColor: colors.surface,
+    borderColor: '#d1d5db',
+  },
+
+  ':disabled': {
+    opacity: 0.45,
+    cursor: 'not-allowed',
+  },
+});
+
+export const pageInfo = style({
+  minWidth: '64px',
+  textAlign: 'center',
   fontSize: '14px',
   color: colors.textMuted,
 });
