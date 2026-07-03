@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
+import UpdateCommentModal from '@/components/modal/update-comment-modal/UpdateCommentModal';
 import * as styles from './PostDetailPage.css';
 
 type Post = {
@@ -30,8 +31,13 @@ type Comment = {
   updatedAt: string;
 };
 
-type CommentsResponse = {
-  items: Comment[];
+type CommentBody = {
+  commentId: string;
+  content: string;
+};
+
+type PaginatedResponse<T> = {
+  items: T[];
   meta: {
     total: number;
     page: number;
@@ -52,6 +58,8 @@ type Me = {
   id: string;
 };
 
+const PAGE_SIZE = 10;
+
 function formatDate(value: string) {
   return new Date(value).toLocaleString('ko-KR', {
     year: 'numeric',
@@ -65,10 +73,13 @@ function formatDate(value: string) {
 export default function PostDetailPage() {
   const params = useParams<{ id: string }>();
   const postId = params.id;
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
-
-  const router = useRouter();
+  const [editingComment, setEditingComment] = useState<Comment | null>(null);
+  const pageParam = Number(searchParams.get('page') ?? '1');
+  const currentPage = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
   const { data: me } = useQuery({
     queryKey: ['me'],
@@ -95,10 +106,10 @@ export default function PostDetailPage() {
     isError: isCommentsError,
     error: commentsError,
   } = useQuery({
-    queryKey: ['comments', postId],
+    queryKey: ['comments', postId, currentPage],
     queryFn: () =>
-      apiFetch<CommentsResponse>(
-        `/posts/${postId}/comments?page=1&pageSize=20`,
+      apiFetch<PaginatedResponse<Comment>>(
+        `/posts/${postId}/comments?page=${currentPage}&pageSize=${PAGE_SIZE}`,
       ),
     enabled: Boolean(postId),
   });
@@ -122,13 +133,20 @@ export default function PostDetailPage() {
       }),
     onSuccess: () => {
       setComment('');
+      const lastPage = Math.max(
+        1,
+        Math.ceil(((post?.commentsCount ?? 0) + 1) / PAGE_SIZE),
+      );
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('page', String(lastPage));
+      router.push(`/posts/${postId}?${params.toString()}`);
       queryClient.invalidateQueries({ queryKey: ['comments', postId] });
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
 
-  const deleteMutation = useMutation({
+  const deletePostMutation = useMutation({
     mutationFn: () => apiFetch(`/posts/${postId}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
@@ -140,9 +158,44 @@ export default function PostDetailPage() {
     },
   });
 
-  const handleDelete = () => {
+  const updateCommentMutation = useMutation({
+    mutationFn: ({ commentId, content }: CommentBody) =>
+      apiFetch(`/posts/${postId}/comments/${commentId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ content }),
+      }),
+    onSuccess: () => {
+      setEditingComment(null);
+      queryClient.invalidateQueries({
+        queryKey: ['comments', postId, currentPage],
+      });
+      queryClient.invalidateQueries({ queryKey: ['me', 'comments'] });
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: string) =>
+      apiFetch(`/posts/${postId}/comments/${commentId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['comments', postId, currentPage],
+      });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
+  const handlePostDelete = () => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
-    deleteMutation.mutate();
+    deletePostMutation.mutate();
   };
 
   const handleLike = () => {
@@ -189,7 +242,37 @@ export default function PostDetailPage() {
     );
   }
 
+  const handleCommentDelete = (commentId: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    deleteCommentMutation.mutate(commentId);
+  };
+
+  const handleCommentUpdateOpen = (comment: Comment) => {
+    setEditingComment(comment);
+  };
+
+  const handleCommentUpdateClose = () => {
+    setEditingComment(null);
+  };
+
+  const handleCommentUpdateSubmit = (content: string) => {
+    if (!editingComment) return;
+
+    updateCommentMutation.mutate({
+      commentId: editingComment.id,
+      content,
+    });
+  };
+
   const comments = commentsData?.items ?? [];
+  const commentsMeta = commentsData?.meta;
+
+  const handlePageChange = (nextPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', String(nextPage));
+    router.push(`/posts/${postId}?${params.toString()}`);
+  };
 
   return (
     <main className={styles.page}>
@@ -217,8 +300,8 @@ export default function PostDetailPage() {
               <button
                 type="button"
                 className={styles.ownerActionDanger}
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
+                onClick={handlePostDelete}
+                disabled={deletePostMutation.isPending}
               >
                 삭제
               </button>
@@ -285,20 +368,83 @@ export default function PostDetailPage() {
         )}
 
         {!isCommentsLoading && !isCommentsError && comments.length > 0 && (
-          <div className={styles.commentList}>
-            {comments.map((item) => (
-              <div key={item.id} className={styles.commentItem}>
-                <div className={styles.commentMeta}>
-                  <span>{item.authorNickname}</span>
-                  <span>·</span>
-                  <time>{formatDate(item.createdAt)}</time>
-                </div>
-                <p className={styles.commentContent}>{item.content}</p>
+          <>
+            <div className={styles.commentList}>
+              {comments.map((item) => {
+                const isCommentOwner = item.authorId === me?.id;
+
+                return (
+                  <div key={item.id} className={styles.commentItem}>
+                    <div className={styles.commentMeta}>
+                      <span>{item.authorNickname}</span>
+                      <span>·</span>
+                      <time>{formatDate(item.createdAt)}</time>
+                      {isCommentOwner && (
+                        <>
+                          <span>·</span>
+                          <button
+                            type="button"
+                            className={styles.ownerAction}
+                            onClick={() => handleCommentUpdateOpen(item)}
+                          >
+                            수정
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.ownerActionDanger}
+                            onClick={() => handleCommentDelete(item.id)}
+                          >
+                            삭제
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <p className={styles.commentContent}>{item.content}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {commentsMeta && commentsMeta.totalPages > 1 && (
+              <div className={styles.pagination}>
+                <button
+                  type="button"
+                  className={styles.pageButton}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!commentsMeta.hasPrev}
+                >
+                  이전
+                </button>
+                <span className={styles.pageInfo}>
+                  {commentsMeta.page} / {commentsMeta.totalPages}
+                </span>
+                <button
+                  type="button"
+                  className={styles.pageButton}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!commentsMeta.hasNext}
+                >
+                  다음
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </section>
+
+      <UpdateCommentModal
+        key={editingComment?.id ?? 'closed'}
+        open={editingComment !== null}
+        initialContent={editingComment?.content ?? ''}
+        onClose={handleCommentUpdateClose}
+        onSubmit={handleCommentUpdateSubmit}
+        isPending={updateCommentMutation.isPending}
+        error={
+          updateCommentMutation.isError
+            ? updateCommentMutation.error.message
+            : undefined
+        }
+      />
     </main>
   );
 }
