@@ -81,6 +81,25 @@ export const sectionTitle = style({
   color: colors.text,
 });
 
+export const deleteAccountButton = style({
+  alignSelf: 'flex-start',
+  height: '40px',
+  padding: '0 20px',
+  marginTop: '8px',
+  border: 'none',
+  borderRadius: '8px',
+  backgroundColor: colors.danger,
+  color: '#ffffff',
+  fontSize: '14px',
+  fontWeight: 600,
+  cursor: 'pointer',
+
+  ':disabled': {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+  },
+});
+
 export const sectionDescription = style({
   margin: '0 0 24px',
   fontSize: '14px',

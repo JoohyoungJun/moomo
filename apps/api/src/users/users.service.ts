@@ -172,4 +172,24 @@ export class UsersService {
       message: '비밀번호 변경 성공',
     };
   }
+
+  async deleteUser(userId: string, password: string) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      throw new AppException(USERS_ERRORS.CURRENTPASSWORD_INCORRECT);
+    }
+
+    await this.usersRepository.deleteUser(userId);
+
+    return {
+      message: '회원탈퇴 성공',
+    };
+  }
 }

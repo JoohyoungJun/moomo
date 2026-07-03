@@ -54,3 +54,9 @@ export class UpdatePasswordDto {
   @IsString()
   declare newPassword: string;
 }
+
+export class DeleteUserRequestDto {
+  @ApiProperty({ example: 'password123' })
+  @IsString()
+  declare password: string;
+}

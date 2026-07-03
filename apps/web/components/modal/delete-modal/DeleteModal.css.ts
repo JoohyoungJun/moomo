@@ -8,28 +8,11 @@ export const title = style({
   color: colors.text,
 });
 
-export const form = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '12px',
-});
-
-export const textarea = style({
-  minHeight: '120px',
-  padding: '12px',
-  border: `1px solid ${colors.border}`,
-  borderRadius: '8px',
+export const description = style({
+  margin: '0 0 24px',
   fontSize: '14px',
-  lineHeight: 1.5,
-  color: colors.text,
-  backgroundColor: colors.background,
-  resize: 'vertical',
-  outline: 'none',
-
-  ':focus': {
-    borderColor: colors.primary,
-    boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
-  },
+  lineHeight: 1.6,
+  color: colors.textMuted,
 });
 
 export const error = style({
@@ -46,8 +29,8 @@ export const actions = style({
 });
 
 export const cancelButton = style({
-  height: '36px',
-  padding: '0 16px',
+  height: '40px',
+  padding: '0 20px',
   border: `1px solid ${colors.border}`,
   borderRadius: '8px',
   backgroundColor: colors.background,
@@ -69,11 +52,11 @@ export const cancelButton = style({
 });
 
 export const submitButton = style({
-  height: '36px',
-  padding: '0 16px',
+  height: '40px',
+  padding: '0 20px',
   border: 'none',
   borderRadius: '8px',
-  backgroundColor: colors.primary,
+  backgroundColor: colors.danger,
   color: '#ffffff',
   fontSize: '14px',
   fontWeight: 600,

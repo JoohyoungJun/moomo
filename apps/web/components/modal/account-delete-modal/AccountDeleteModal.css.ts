@@ -1,41 +1,64 @@
-import { style } from '@vanilla-extract/css';
 import { colors } from '@/styles/theme.css';
+import { style } from '@vanilla-extract/css';
 
 export const title = style({
-  margin: '0 0 16px',
+  margin: '0 0 8px',
   fontSize: '18px',
   fontWeight: 600,
   color: colors.text,
 });
 
+export const description = style({
+  margin: '0 0 24px',
+  fontSize: '14px',
+  lineHeight: 1.6,
+  color: colors.textMuted,
+});
+
 export const form = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: '16px',
 });
 
-export const textarea = style({
-  minHeight: '120px',
-  padding: '12px',
+export const field = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+});
+
+export const label = style({
+  fontSize: '14px',
+  fontWeight: 500,
+  color: colors.text,
+});
+
+export const input = style({
+  height: '44px',
+  padding: '0 12px',
   border: `1px solid ${colors.border}`,
   borderRadius: '8px',
   fontSize: '14px',
-  lineHeight: 1.5,
   color: colors.text,
   backgroundColor: colors.background,
-  resize: 'vertical',
   outline: 'none',
 
   ':focus': {
     borderColor: colors.primary,
     boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
   },
+
+  ':disabled': {
+    backgroundColor: colors.surface,
+    color: colors.textMuted,
+    cursor: 'not-allowed',
+  },
 });
 
 export const error = style({
   margin: 0,
   fontSize: '14px',
-  color: '#dc2626',
+  color: colors.danger,
 });
 
 export const actions = style({
@@ -46,8 +69,8 @@ export const actions = style({
 });
 
 export const cancelButton = style({
-  height: '36px',
-  padding: '0 16px',
+  height: '40px',
+  padding: '0 20px',
   border: `1px solid ${colors.border}`,
   borderRadius: '8px',
   backgroundColor: colors.background,
@@ -69,11 +92,11 @@ export const cancelButton = style({
 });
 
 export const submitButton = style({
-  height: '36px',
-  padding: '0 16px',
+  height: '40px',
+  padding: '0 20px',
   border: 'none',
   borderRadius: '8px',
-  backgroundColor: colors.primary,
+  backgroundColor: colors.danger,
   color: '#ffffff',
   fontSize: '14px',
   fontWeight: 600,
