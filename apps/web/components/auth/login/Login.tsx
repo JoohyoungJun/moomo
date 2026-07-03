@@ -54,7 +54,7 @@ export default function LoginPage() {
               className={styles.input}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@example.com"
+              placeholder="이메일을 입력하세요"
               autoComplete="email"
               required
             />
