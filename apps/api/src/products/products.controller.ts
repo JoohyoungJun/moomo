@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -12,7 +13,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProductResponseDto } from './dto/products-response.dto';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
 import {
@@ -93,5 +94,24 @@ export class ProductsController {
     @Body() body: UpdateProductRequestDto,
   ) {
     return this.productsService.updateProduct(req.user.id, productId, body);
+  }
+
+  @ApiOperation({ summary: '상품 삭제 (관리자용)' })
+  @ApiResponse({ status: HttpStatus.OK, description: '상품 삭제 성공' })
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(
+    USERS_ERRORS.USER_NOT_FOUND,
+    PRODUCTS_ERRORS.PRODUCT_NOT_FOUND,
+  )
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete(':id')
+  deleteProduct(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Param('id') productId: string,
+  ) {
+    return this.productsService.deleteProduct(req.user.id, productId);
   }
 }

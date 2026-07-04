@@ -150,4 +150,31 @@ export class ProductsService {
 
     return updated;
   }
+
+  async deleteProduct(
+    userId: string,
+    productId: string,
+  ): Promise<{ message: string }> {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    if (!user.isAdmin) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    const product = await this.productsRepository.findProductById(productId);
+
+    if (product === null) {
+      throw new AppException(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND);
+    }
+
+    await this.productsRepository.deleteProduct(productId);
+
+    return {
+      message: '상품 삭제 성공',
+    };
+  }
 }

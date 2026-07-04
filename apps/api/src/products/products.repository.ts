@@ -32,4 +32,10 @@ export class ProductsRepository {
       data,
     });
   }
+
+  deleteProduct(id: string) {
+    return this.prisma.product.delete({
+      where: { id },
+    });
+  }
 }
