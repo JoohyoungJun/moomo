@@ -159,3 +159,29 @@ export const USERS_ERRORS = {
     code: 'USER_NICKNAME_ALREADY_EXISTS',
   },
 };
+
+export const PRODUCTS_ERRORS = {
+  PRODUCT_PRICE_INVALID: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '상품 가격이 유효하지 않습니다.',
+    code: 'PRODUCT_PRICE_INVALID',
+  },
+
+  PRODUCT_STOCK_INVALID: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '상품 재고가 유효하지 않습니다.',
+    code: 'PRODUCT_STOCK_INVALID',
+  },
+
+  PRODUCT_NAME_INVALID: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '상품 이름이 유효하지 않습니다.',
+    code: 'PRODUCT_NAME_INVALID',
+  },
+
+  PRODUCT_DESCRIPTION_INVALID: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '상품 설명이 유효하지 않습니다.',
+    code: 'PRODUCT_DESCRIPTION_INVALID',
+  },
+};
