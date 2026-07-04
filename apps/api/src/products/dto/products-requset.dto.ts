@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export const MIN_PRODUCT_PRICE = 0;
@@ -30,3 +30,7 @@ export class CreateProductRequestDto {
   @IsNotEmpty()
   declare stock: number;
 }
+
+export class UpdateProductRequestDto extends PartialType(
+  CreateProductRequestDto,
+) {}

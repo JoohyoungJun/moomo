@@ -161,6 +161,12 @@ export const USERS_ERRORS = {
 };
 
 export const PRODUCTS_ERRORS = {
+  PRODUCT_UPDATE_EMPTY: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '상품 수정 내용이 없습니다.',
+    code: 'PRODUCT_UPDATE_EMPTY',
+  },
+
   PRODUCT_NOT_FOUND: {
     status: HttpStatus.NOT_FOUND,
     message: '상품을 찾을 수 없습니다.',

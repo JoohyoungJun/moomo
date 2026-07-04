@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -22,7 +23,10 @@ import {
 import { JwtAccessGuard } from '@/auth/jwt/jwt-access.guard';
 import { Request } from 'express';
 import { JwtAccessUser } from '@/auth/jwt/types';
-import { CreateProductRequestDto } from './dto/products-requset.dto';
+import {
+  CreateProductRequestDto,
+  UpdateProductRequestDto,
+} from './dto/products-requset.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -61,5 +65,33 @@ export class ProductsController {
   @Get(':id')
   getProductById(@Param('id') productId: string) {
     return this.productsService.getProductById(productId);
+  }
+
+  @ApiOperation({ summary: '상품 수정 (관리자용)' })
+  @ApiSuccessResponse(HttpStatus.OK, ProductResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(
+    USERS_ERRORS.USER_NOT_FOUND,
+    PRODUCTS_ERRORS.PRODUCT_NOT_FOUND,
+  )
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    PRODUCTS_ERRORS.PRODUCT_PRICE_INVALID,
+    PRODUCTS_ERRORS.PRODUCT_STOCK_INVALID,
+    PRODUCTS_ERRORS.PRODUCT_NAME_INVALID,
+    PRODUCTS_ERRORS.PRODUCT_DESCRIPTION_INVALID,
+    PRODUCTS_ERRORS.PRODUCT_UPDATE_EMPTY,
+  )
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(':id')
+  updateProduct(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Param('id') productId: string,
+    @Body() body: UpdateProductRequestDto,
+  ) {
+    return this.productsService.updateProduct(req.user.id, productId, body);
   }
 }
