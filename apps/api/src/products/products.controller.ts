@@ -3,8 +3,10 @@ import { ProductsService } from './products.service';
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -48,5 +50,16 @@ export class ProductsController {
     @Body() body: CreateProductRequestDto,
   ) {
     return this.productsService.createProduct(req.user.id, body);
+  }
+
+  @ApiOperation({ summary: '상품 상세 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, ProductResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND)
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  getProductById(@Param('id') productId: string) {
+    return this.productsService.getProductById(productId);
   }
 }

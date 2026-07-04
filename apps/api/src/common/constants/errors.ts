@@ -161,6 +161,12 @@ export const USERS_ERRORS = {
 };
 
 export const PRODUCTS_ERRORS = {
+  PRODUCT_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    message: '상품을 찾을 수 없습니다.',
+    code: 'PRODUCT_NOT_FOUND',
+  },
+
   PRODUCT_PRICE_INVALID: {
     status: HttpStatus.BAD_REQUEST,
     message: '상품 가격이 유효하지 않습니다.',

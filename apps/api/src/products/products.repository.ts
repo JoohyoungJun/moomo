@@ -16,4 +16,10 @@ export class ProductsRepository {
       },
     });
   }
+
+  findProductById(id: string) {
+    return this.prisma.product.findUnique({
+      where: { id },
+    });
+  }
 }

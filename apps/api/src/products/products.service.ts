@@ -32,7 +32,7 @@ export class ProductsService {
   ): Promise<ProductResponseDto> {
     const user = await this.usersRepository.findById(userId);
 
-    if (!user) {
+    if (user === null) {
       throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
     }
 
@@ -66,6 +66,16 @@ export class ProductsService {
     }
 
     const product = await this.productsRepository.createProduct(data);
+
+    return product;
+  }
+
+  async getProductById(id: string): Promise<ProductResponseDto> {
+    const product = await this.productsRepository.findProductById(id);
+
+    if (product === null) {
+      throw new AppException(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND);
+    }
 
     return product;
   }
