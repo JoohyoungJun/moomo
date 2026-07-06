@@ -38,7 +38,6 @@ export const description = style({
   maxWidth: '480px',
   fontSize: '17px',
   lineHeight: 1.6,
-  color: colors.textMuted,
 });
 
 export const featureGrid = style({
@@ -76,4 +75,9 @@ export const featureDescription = style({
   fontSize: '14px',
   lineHeight: 1.5,
   color: colors.textMuted,
+  textDecoration: 'none',
+  cursor: 'pointer',
+  ':hover': {
+    textDecoration: 'underline',
+  },
 });
