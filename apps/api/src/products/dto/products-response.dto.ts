@@ -1,4 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
+
+export class ProductImageResponseDto {
+  @ApiProperty({ format: 'uuid' })
+  declare id: string;
+
+  @ApiProperty({ description: '이미지 URL' })
+  declare url: string;
+
+  @ApiProperty({ description: '이미지 순서' })
+  declare order: number;
+}
 
 export class ProductResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -21,4 +32,16 @@ export class ProductResponseDto {
 
   @ApiProperty({ description: '상품 수정일' })
   declare updatedAt: Date;
+
+  @ApiProperty({ type: [ProductImageResponseDto] })
+  declare images: ProductImageResponseDto[];
+}
+
+export class ProductListResponseDto extends OmitType(ProductResponseDto, [
+  'description',
+  'updatedAt',
+  'images',
+]) {
+  @ApiProperty({ description: '상품 썸네일 이미지' })
+  declare thumbnailImage: string;
 }

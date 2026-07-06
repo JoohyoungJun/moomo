@@ -10,8 +10,9 @@ import {
   MIN_PRODUCT_PRICE,
   MIN_PRODUCT_STOCK,
   MIN_STRING_LENGTH,
+  ProductsQueryDto,
   UpdateProductRequestDto,
-} from './dto/products-requset.dto';
+} from './dto/products-request.dto';
 import { ProductResponseDto } from './dto/products-response.dto';
 import { AppException } from '@/common/exception/app.exception';
 import {
@@ -19,6 +20,10 @@ import {
   PRODUCTS_ERRORS,
   USERS_ERRORS,
 } from '@/common/constants/errors';
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from '@/common/pagination/pagination.util';
 
 @Injectable()
 export class ProductsService {
@@ -71,6 +76,28 @@ export class ProductsService {
     return product;
   }
 
+  async getAllProducts(query: ProductsQueryDto) {
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+    const search = query.search?.trim() || undefined;
+
+    const { items, total } = await this.productsRepository.findAllProducts(
+      skip,
+      take,
+      search,
+    );
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      stock: item.stock,
+      createdAt: item.createdAt,
+      thumbnailImage: item.images[0]?.url,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
   async getProductById(id: string): Promise<ProductResponseDto> {
     const product = await this.productsRepository.findProductById(id);
 
@@ -96,7 +123,7 @@ export class ProductsService {
       throw new AppException(COMMON_ERRORS.FORBIDDEN);
     }
 
-    const { name, description, price, stock } = data;
+    const { name, description, price, stock, images } = data;
 
     if (
       name !== undefined &&
@@ -132,23 +159,37 @@ export class ProductsService {
       name === undefined &&
       description === undefined &&
       price === undefined &&
-      stock === undefined
+      stock === undefined &&
+      images === undefined
     ) {
       throw new AppException(PRODUCTS_ERRORS.PRODUCT_UPDATE_EMPTY);
     }
 
-    const post = await this.productsRepository.findProductById(productId);
+    const product = await this.productsRepository.findProductById(productId);
 
-    if (post === null) {
+    if (product === null) {
       throw new AppException(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND);
     }
 
-    const updated = await this.productsRepository.updateProduct(
-      productId,
-      data,
-    );
+    const productData: Omit<UpdateProductRequestDto, 'images'> = {};
 
-    return updated;
+    if (name !== undefined) productData.name = name;
+    if (description !== undefined) productData.description = description;
+    if (price !== undefined) productData.price = price;
+    if (stock !== undefined) productData.stock = stock;
+
+    if (images !== undefined) {
+      if (Object.keys(productData).length > 0) {
+        await this.productsRepository.updateProduct(productId, productData);
+      }
+      return this.productsRepository.replaceProductImages(productId, images);
+    }
+
+    if (Object.keys(productData).length > 0) {
+      return this.productsRepository.updateProduct(productId, productData);
+    }
+
+    return product;
   }
 
   async deleteProduct(
