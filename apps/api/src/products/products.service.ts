@@ -96,7 +96,7 @@ export class ProductsService {
       throw new AppException(COMMON_ERRORS.FORBIDDEN);
     }
 
-    const { name, description, price, stock } = data;
+    const { name, description, price, stock, images } = data;
 
     if (
       name !== undefined &&
@@ -132,23 +132,37 @@ export class ProductsService {
       name === undefined &&
       description === undefined &&
       price === undefined &&
-      stock === undefined
+      stock === undefined &&
+      images === undefined
     ) {
       throw new AppException(PRODUCTS_ERRORS.PRODUCT_UPDATE_EMPTY);
     }
 
-    const post = await this.productsRepository.findProductById(productId);
+    const product = await this.productsRepository.findProductById(productId);
 
-    if (post === null) {
+    if (product === null) {
       throw new AppException(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND);
     }
 
-    const updated = await this.productsRepository.updateProduct(
-      productId,
-      data,
-    );
+    const productData: Omit<UpdateProductRequestDto, 'images'> = {};
 
-    return updated;
+    if (name !== undefined) productData.name = name;
+    if (description !== undefined) productData.description = description;
+    if (price !== undefined) productData.price = price;
+    if (stock !== undefined) productData.stock = stock;
+
+    if (images !== undefined) {
+      if (Object.keys(productData).length > 0) {
+        await this.productsRepository.updateProduct(productId, productData);
+      }
+      return this.productsRepository.replaceProductImages(productId, images);
+    }
+
+    if (Object.keys(productData).length > 0) {
+      return this.productsRepository.updateProduct(productId, productData);
+    }
+
+    return product;
   }
 
   async deleteProduct(
