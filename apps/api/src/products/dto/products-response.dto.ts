@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 
 export class ProductImageResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -35,4 +35,13 @@ export class ProductResponseDto {
 
   @ApiProperty({ type: [ProductImageResponseDto] })
   declare images: ProductImageResponseDto[];
+}
+
+export class ProductListResponseDto extends OmitType(ProductResponseDto, [
+  'description',
+  'updatedAt',
+  'images',
+]) {
+  @ApiProperty({ description: '상품 썸네일 이미지' })
+  declare thumbnailImage: string;
 }

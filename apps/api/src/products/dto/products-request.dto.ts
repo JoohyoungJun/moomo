@@ -1,3 +1,4 @@
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -6,6 +7,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -56,3 +59,12 @@ export class CreateProductRequestDto {
 export class UpdateProductRequestDto extends PartialType(
   CreateProductRequestDto,
 ) {}
+
+export class ProductsQueryDto extends PaginationQueryDto {
+  @ApiProperty({ description: '검색어' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(30)
+  declare search?: string;
+}

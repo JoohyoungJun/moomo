@@ -10,8 +10,9 @@ import {
   MIN_PRODUCT_PRICE,
   MIN_PRODUCT_STOCK,
   MIN_STRING_LENGTH,
+  ProductsQueryDto,
   UpdateProductRequestDto,
-} from './dto/products-requset.dto';
+} from './dto/products-request.dto';
 import { ProductResponseDto } from './dto/products-response.dto';
 import { AppException } from '@/common/exception/app.exception';
 import {
@@ -19,6 +20,10 @@ import {
   PRODUCTS_ERRORS,
   USERS_ERRORS,
 } from '@/common/constants/errors';
+import {
+  buildPaginationResponse,
+  getPaginationParams,
+} from '@/common/pagination/pagination.util';
 
 @Injectable()
 export class ProductsService {
@@ -69,6 +74,28 @@ export class ProductsService {
     const product = await this.productsRepository.createProduct(data);
 
     return product;
+  }
+
+  async getAllProducts(query: ProductsQueryDto) {
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+    const search = query.search?.trim() || undefined;
+
+    const { items, total } = await this.productsRepository.findAllProducts(
+      skip,
+      take,
+      search,
+    );
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      stock: item.stock,
+      createdAt: item.createdAt,
+      thumbnailImage: item.images[0]?.url,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
   }
 
   async getProductById(id: string): Promise<ProductResponseDto> {
