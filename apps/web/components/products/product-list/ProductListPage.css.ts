@@ -94,8 +94,8 @@ export const list = style({
 
 export const card = style({
   display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
+  alignItems: 'center',
+  gap: '12px',
   minHeight: 0,
   overflow: 'hidden',
   padding: '12px 16px',
@@ -109,6 +109,30 @@ export const card = style({
     backgroundColor: colors.surface,
     borderColor: '#d1d5db',
   },
+});
+
+export const cardContent = style({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  justifyContent: 'center',
+  minWidth: 0,
+});
+
+export const cardThumbnail = style({
+  flexShrink: 0,
+  width: '72px',
+  height: '72px',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  backgroundColor: 'inherit',
+});
+
+export const cardThumbnailImage = style({
+  display: 'block',
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
 });
 
 export const cardTitle = style({

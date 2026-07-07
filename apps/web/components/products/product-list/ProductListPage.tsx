@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Image from 'next/image';
 import * as styles from './ProductListPage.css';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -13,8 +14,38 @@ type ProductListItem = {
   price: number;
   stock: number;
   createdAt: string;
-  thumbnailImage: string;
+  thumbnailImage?: string | null;
 };
+
+function isAllowedThumbnailUrl(src: string) {
+  try {
+    const url = new URL(src);
+    return url.protocol === 'https:' && url.hostname.endsWith('.supabase.co');
+  } catch {
+    return false;
+  }
+}
+
+function ProductCardThumbnail({ src }: { src?: string | null }) {
+  const [hasError, setHasError] = useState(false);
+  const showImage = Boolean(src) && isAllowedThumbnailUrl(src!) && !hasError;
+
+  return (
+    <div className={styles.cardThumbnail} aria-hidden>
+      {showImage && (
+        <Image
+          src={src!}
+          alt=""
+          width={72}
+          height={72}
+          sizes="72px"
+          className={styles.cardThumbnailImage}
+          onError={() => setHasError(true)}
+        />
+      )}
+    </div>
+  );
+}
 
 const PAGE_SIZE = 4;
 
@@ -156,20 +187,24 @@ export default function ProductListPage() {
             {products.map((product) => (
               <Link
                 key={product.id}
-                href={`/posts/${product.id}`}
+                href={`/products/${product.id}`}
                 className={styles.card}
               >
-                <h2 className={styles.cardTitle}>{product.name}</h2>
+                <div className={styles.cardContent}>
+                  <h2 className={styles.cardTitle}>{product.name}</h2>
 
-                <div className={styles.cardMeta}>
-                  <time>{formatDate(product.createdAt)}</time>
+                  <div className={styles.cardMeta}>
+                    <time>{formatDate(product.createdAt)}</time>
+                  </div>
+
+                  <div className={styles.cardStats}>
+                    <span>가격: {product.price}원</span>
+                    <span>·</span>
+                    <span>재고: {product.stock}개</span>
+                  </div>
                 </div>
 
-                <div className={styles.cardStats}>
-                  <span>가격: {product.price}원</span>
-                  <span>·</span>
-                  <span>재고: {product.stock}개</span>
-                </div>
+                <ProductCardThumbnail src={product.thumbnailImage} />
               </Link>
             ))}
           </div>
