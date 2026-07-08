@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
+  OrderProductResponseDto,
   ProductListResponseDto,
   ProductResponseDto,
 } from './dto/products-response.dto';
@@ -30,6 +31,7 @@ import { Request } from 'express';
 import { JwtAccessUser } from '@/auth/jwt/types';
 import {
   CreateProductRequestDto,
+  OrderProductRequestDto,
   ProductsQueryDto,
   UpdateProductRequestDto,
 } from './dto/products-request.dto';
@@ -128,5 +130,30 @@ export class ProductsController {
     @Param('id') productId: string,
   ) {
     return this.productsService.deleteProduct(req.user.id, productId);
+  }
+
+  @ApiOperation({ summary: '상품 주문' })
+  @ApiSuccessResponse(HttpStatus.OK, OrderProductResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    PRODUCTS_ERRORS.PRODUCT_ORDER_QUANTITY_INVALID,
+    PRODUCTS_ERRORS.PRODUCT_STOCK_INVALID,
+  )
+  @ApiErrorResponse(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/order')
+  orderProduct(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Param('id') productId: string,
+    @Body() body: OrderProductRequestDto,
+  ) {
+    return this.productsService.orderProduct(
+      req.user.id,
+      productId,
+      body.quantity,
+    );
   }
 }

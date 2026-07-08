@@ -45,3 +45,23 @@ export class ProductListResponseDto extends OmitType(ProductResponseDto, [
   @ApiProperty({ description: '상품 썸네일 이미지' })
   declare thumbnailImage: string;
 }
+
+export class OrderProductResponseDto {
+  @ApiProperty({ description: '주문 id' })
+  declare id: string;
+
+  @ApiProperty({ description: '주문자 id' })
+  declare userId: string;
+
+  @ApiProperty({ description: '상품 id' })
+  declare productId: string;
+
+  @ApiProperty({ description: '주문 수량' })
+  declare quantity: number;
+
+  @ApiProperty({ description: '주문 가격' })
+  declare totalPrice: number;
+
+  @ApiProperty({ description: '주문 생성일' })
+  declare createdAt: Date;
+}
