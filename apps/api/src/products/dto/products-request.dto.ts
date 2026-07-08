@@ -19,6 +19,7 @@ export const MAX_PRODUCT_STOCK = 10_000;
 export const MIN_STRING_LENGTH = 1;
 export const MAX_PRODUCT_NAME_LENGTH = 100;
 export const MAX_PRODUCT_DESCRIPTION_LENGTH = 1000;
+export const MAX_PRODUCT_ORDER_QUANTITY = 10;
 
 export class ProductImageRequestDto {
   @ApiProperty({ description: '이미지 URL' })
@@ -67,4 +68,11 @@ export class ProductsQueryDto extends PaginationQueryDto {
   @MinLength(1)
   @MaxLength(30)
   declare search?: string;
+}
+
+export class OrderProductRequestDto {
+  @ApiProperty({ description: '주문 수량' })
+  @IsNumber()
+  @IsNotEmpty()
+  declare quantity: number;
 }

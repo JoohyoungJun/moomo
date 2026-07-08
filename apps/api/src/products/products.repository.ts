@@ -104,4 +104,32 @@ export class ProductsRepository {
       where: { id },
     });
   }
+
+  async orderProduct(
+    userId: string,
+    productId: string,
+    quantity: number,
+    totalPrice: number,
+  ) {
+    const [product, order] = await Promise.all([
+      this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          stock: {
+            decrement: quantity,
+          },
+        },
+      }),
+      this.prisma.order.create({
+        data: {
+          userId,
+          productId,
+          quantity,
+          totalPrice,
+        },
+      }),
+    ]);
+
+    return { product, order };
+  }
 }

@@ -5,6 +5,7 @@ import {
   CreateProductRequestDto,
   MAX_PRODUCT_DESCRIPTION_LENGTH,
   MAX_PRODUCT_NAME_LENGTH,
+  MAX_PRODUCT_ORDER_QUANTITY,
   MAX_PRODUCT_PRICE,
   MAX_PRODUCT_STOCK,
   MIN_PRODUCT_PRICE,
@@ -13,7 +14,10 @@ import {
   ProductsQueryDto,
   UpdateProductRequestDto,
 } from './dto/products-request.dto';
-import { ProductResponseDto } from './dto/products-response.dto';
+import {
+  OrderProductResponseDto,
+  ProductResponseDto,
+} from './dto/products-response.dto';
 import { AppException } from '@/common/exception/app.exception';
 import {
   COMMON_ERRORS,
@@ -216,6 +220,51 @@ export class ProductsService {
 
     return {
       message: '상품 삭제 성공',
+    };
+  }
+
+  async orderProduct(
+    userId: string,
+    productId: string,
+    quantity: number,
+  ): Promise<OrderProductResponseDto> {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    const product = await this.productsRepository.findProductById(productId);
+
+    if (product === null) {
+      throw new AppException(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND);
+    }
+
+    if (product.stock < quantity || product.stock <= 0) {
+      throw new AppException(PRODUCTS_ERRORS.PRODUCT_STOCK_INVALID);
+    }
+
+    if (quantity > MAX_PRODUCT_ORDER_QUANTITY) {
+      throw new AppException(PRODUCTS_ERRORS.PRODUCT_ORDER_QUANTITY_INVALID);
+    }
+
+    const totalPrice = product.price * quantity;
+
+    const { product: productAfterOrder, order } =
+      await this.productsRepository.orderProduct(
+        userId,
+        productId,
+        quantity,
+        totalPrice,
+      );
+
+    return {
+      id: order.id,
+      userId: order.userId,
+      productId: productAfterOrder.id,
+      quantity: order.quantity,
+      totalPrice: order.totalPrice,
+      createdAt: order.createdAt,
     };
   }
 }
