@@ -10,11 +10,16 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ProductResponseDto } from './dto/products-response.dto';
+import {
+  OrderProductResponseDto,
+  ProductListResponseDto,
+  ProductResponseDto,
+} from './dto/products-response.dto';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
 import {
   COMMON_ERRORS,
@@ -26,8 +31,10 @@ import { Request } from 'express';
 import { JwtAccessUser } from '@/auth/jwt/types';
 import {
   CreateProductRequestDto,
+  OrderProductRequestDto,
+  ProductsQueryDto,
   UpdateProductRequestDto,
-} from './dto/products-requset.dto';
+} from './dto/products-request.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -55,6 +62,16 @@ export class ProductsController {
     @Body() body: CreateProductRequestDto,
   ) {
     return this.productsService.createProduct(req.user.id, body);
+  }
+
+  @ApiOperation({ summary: '상품 목록 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, [ProductListResponseDto])
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  getAllProducts(@Query() query: ProductsQueryDto) {
+    return this.productsService.getAllProducts(query);
   }
 
   @ApiOperation({ summary: '상품 상세 조회' })
@@ -113,5 +130,30 @@ export class ProductsController {
     @Param('id') productId: string,
   ) {
     return this.productsService.deleteProduct(req.user.id, productId);
+  }
+
+  @ApiOperation({ summary: '상품 주문' })
+  @ApiSuccessResponse(HttpStatus.OK, OrderProductResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(
+    COMMON_ERRORS.VALIDATION_ERROR,
+    PRODUCTS_ERRORS.PRODUCT_ORDER_QUANTITY_INVALID,
+    PRODUCTS_ERRORS.PRODUCT_STOCK_INVALID,
+  )
+  @ApiErrorResponse(PRODUCTS_ERRORS.PRODUCT_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/order')
+  orderProduct(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Param('id') productId: string,
+    @Body() body: OrderProductRequestDto,
+  ) {
+    return this.productsService.orderProduct(
+      req.user.id,
+      productId,
+      body.quantity,
+    );
   }
 }

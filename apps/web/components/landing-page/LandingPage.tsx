@@ -1,17 +1,21 @@
+import Link from 'next/link';
 import * as styles from './LandingPage.css';
 
 const features = [
   {
     title: '게시판',
     description: '무인매장 운영 이야기와 실무 팁을 나눠요.',
+    href: '/posts',
   },
   {
     title: '소통',
     description: '댓글로 의견을 주고받으며 함께 고민해요.',
+    href: '/',
   },
   {
-    title: '알림',
-    description: '내 글에 반응이 오면 바로 알려줘요.',
+    title: '상품',
+    description: '무모 회원 전용 상품을 구매해요.',
+    href: '/products',
   },
 ];
 
@@ -30,7 +34,9 @@ export default function LandingPage() {
         {features.map((feature) => (
           <div key={feature.title} className={styles.featureCard}>
             <h2 className={styles.featureTitle}>{feature.title}</h2>
-            <p className={styles.featureDescription}>{feature.description}</p>
+            <Link href={feature.href} className={styles.featureDescription}>
+              <p>{feature.description}</p>
+            </Link>
           </div>
         ))}
       </div>

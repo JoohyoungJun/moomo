@@ -161,6 +161,12 @@ export const USERS_ERRORS = {
 };
 
 export const PRODUCTS_ERRORS = {
+  PRODUCT_ORDER_QUANTITY_INVALID: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '상품 주문 수량이 유효하지 않습니다.',
+    code: 'PRODUCT_ORDER_QUANTITY_INVALID',
+  },
+
   PRODUCT_UPDATE_EMPTY: {
     status: HttpStatus.BAD_REQUEST,
     message: '상품 수정 내용이 없습니다.',
