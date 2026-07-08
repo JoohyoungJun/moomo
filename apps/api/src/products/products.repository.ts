@@ -132,4 +132,32 @@ export class ProductsRepository {
 
     return { product, order };
   }
+
+  findOrderById(id: string) {
+    return this.prisma.order.findUnique({
+      where: { id },
+    });
+  }
+
+  async findOrdersByUserId(userId: string, skip: number, take: number) {
+    const [items, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where: { userId },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          product: {
+            select: {
+              name: true,
+              price: true,
+            },
+          },
+        },
+      }),
+      this.prisma.order.count({ where: { userId } }),
+    ]);
+
+    return { items, total };
+  }
 }

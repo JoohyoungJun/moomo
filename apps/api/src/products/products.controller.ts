@@ -19,6 +19,7 @@ import {
   OrderProductResponseDto,
   ProductListResponseDto,
   ProductResponseDto,
+  UserOrderResponseDto,
 } from './dto/products-response.dto';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
 import {
@@ -35,6 +36,7 @@ import {
   ProductsQueryDto,
   UpdateProductRequestDto,
 } from './dto/products-request.dto';
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -72,6 +74,21 @@ export class ProductsController {
   @Get()
   getAllProducts(@Query() query: ProductsQueryDto) {
     return this.productsService.getAllProducts(query);
+  }
+
+  @ApiOperation({ summary: '사용자 주문 목록 조회' })
+  @ApiSuccessResponse(HttpStatus.OK, [UserOrderResponseDto])
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('orders')
+  getOrdersByUserId(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Query() query: PaginationQueryDto,
+  ) {
+    return this.productsService.getOrdersByUserId(req.user.id, query);
   }
 
   @ApiOperation({ summary: '상품 상세 조회' })
