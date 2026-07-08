@@ -1,5 +1,5 @@
-
+import ProductDetailPage from '@/components/products/product-detail/ProductDetailPage';
 
 export default function Page() {
-  return <>상품 상세 페이지</>
+  return <ProductDetailPage />;
 }
