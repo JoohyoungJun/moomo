@@ -50,6 +50,7 @@ export async function POST(req: Request) {
       });
 
     if (uploadError) {
+      console.error('[upload] supabase storage error:', uploadError);
       return NextResponse.json(
         { message: uploadError.message },
         { status: 500 },
@@ -58,7 +59,10 @@ export async function POST(req: Request) {
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
     return NextResponse.json({ url: data.publicUrl });
-  } catch {
-    return NextResponse.json({ message: '업로드 실패' }, { status: 500 });
+  } catch (error) {
+    console.error('[upload] unexpected error:', error);
+    const message =
+      error instanceof Error ? error.message : '업로드에 실패했습니다.';
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
