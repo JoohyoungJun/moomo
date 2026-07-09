@@ -173,10 +173,7 @@ export default function ProductDetailPage() {
               alt={product.name}
               width={1200}
               height={800}
-              style={{
-                width: '100%',
-                height: 'auto',
-              }}
+              className={styles.productImage}
             />
           ))}
         </div>

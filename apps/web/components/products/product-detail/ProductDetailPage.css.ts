@@ -74,8 +74,16 @@ export const content = style({
 
 export const images = style({
   display: 'flex',
-  gap: '8px',
+  flexDirection: 'column',
+  gap: '12px',
   marginBottom: '16px',
+});
+
+export const productImage = style({
+  width: '50%',
+  height: 'auto',
+  borderRadius: '8px',
+  border: `1px solid ${colors.border}`,
 });
 
 export const price = style({

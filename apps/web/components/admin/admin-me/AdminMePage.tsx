@@ -352,9 +352,9 @@ export default function AdminMePage() {
                 description: editingProductDetail.description,
                 price: editingProductDetail.price,
                 stock: editingProductDetail.stock,
-                imageUrl: editingProductDetail.images
+                imageUrls: editingProductDetail.images
                   .map(getImageUrl)
-                  .find(Boolean),
+                  .filter(Boolean),
               }
             : editingProduct
               ? {

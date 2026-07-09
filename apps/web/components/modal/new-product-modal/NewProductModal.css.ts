@@ -73,12 +73,40 @@ export const fileInput = style({
   fontSize: '13px',
 });
 
+export const previewList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+});
+
+export const previewItem = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  width: '100%',
+});
+
 export const previewImage = style({
   width: '100%',
   maxHeight: '180px',
   objectFit: 'cover',
   borderRadius: '8px',
   border: `1px solid ${colors.border}`,
+});
+
+export const removeImageButton = style({
+  height: '28px',
+  border: `1px solid ${colors.border}`,
+  borderRadius: '6px',
+  backgroundColor: colors.background,
+  color: colors.textMuted,
+  fontSize: '12px',
+  cursor: 'pointer',
+
+  ':disabled': {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+  },
 });
 
 export const numberRow = style({

@@ -5,6 +5,8 @@ import * as styles from './NewProductModal.css';
 import ModalLayout from '../modal-layout/ModalLayout';
 import Image from 'next/image';
 
+const MAX_IMAGES = 10;
+
 export type ProductFormValues = {
   name: string;
   description: string;
@@ -18,7 +20,7 @@ type ProductFormInitialValues = {
   description: string;
   price: number;
   stock: number;
-  imageUrl?: string;
+  imageUrls?: string[];
 };
 
 type NewProductModalProps = {
@@ -30,6 +32,23 @@ type NewProductModalProps = {
   isPending?: boolean;
   error?: string;
 };
+
+async function uploadImage(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = (await response.json()) as { url?: string; message?: string };
+  if (!response.ok || !data.url) {
+    throw new Error(data.message ?? '이미지 업로드에 실패했습니다.');
+  }
+
+  return data.url;
+}
 
 export default function NewProductModal({
   open,
@@ -50,22 +69,32 @@ export default function NewProductModal({
   const [stock, setStock] = useState(
     initialValues ? String(initialValues.stock) : '',
   );
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(
-    initialValues?.imageUrl ?? '',
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>(
+    initialValues?.imageUrls ?? [],
   );
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [newImagePreviewUrls, setNewImagePreviewUrls] = useState<string[]>([]);
+  const [imagesTouched, setImagesTouched] = useState(false);
   const [imageError, setImageError] = useState('');
   const [isImageUploading, setIsImageUploading] = useState(false);
 
   const isEditMode = mode === 'edit';
+  const totalImageCount = existingImageUrls.length + newImageFiles.length;
+
+  const revokePreviewUrls = (urls: string[]) => {
+    urls.forEach((url) => URL.revokeObjectURL(url));
+  };
 
   const resetForm = () => {
+    revokePreviewUrls(newImagePreviewUrls);
     setName('');
     setDescription('');
     setPrice('');
     setStock('');
-    setImageFile(null);
-    setImagePreviewUrl('');
+    setExistingImageUrls([]);
+    setNewImageFiles([]);
+    setNewImagePreviewUrls([]);
+    setImagesTouched(false);
     setImageError('');
   };
 
@@ -77,25 +106,40 @@ export default function NewProductModal({
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
 
-    if (!file) {
-      setImageFile(null);
-      setImagePreviewUrl('');
-      setImageError('');
-      return;
-    }
+    if (files.length === 0) return;
 
-    if (!file.type.startsWith('image/')) {
+    const invalidFile = files.find((file) => !file.type.startsWith('image/'));
+    if (invalidFile) {
       setImageError('이미지 파일만 선택할 수 있습니다.');
-      setImageFile(null);
-      setImagePreviewUrl('');
       return;
     }
+
+    if (totalImageCount + files.length > MAX_IMAGES) {
+      setImageError(`이미지는 최대 ${MAX_IMAGES}장까지 등록할 수 있습니다.`);
+      return;
+    }
+
+    const previewUrls = files.map((file) => URL.createObjectURL(file));
 
     setImageError('');
-    setImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
+    setImagesTouched(true);
+    setNewImageFiles((prev) => [...prev, ...files]);
+    setNewImagePreviewUrls((prev) => [...prev, ...previewUrls]);
+  };
+
+  const handleRemoveExistingImage = (index: number) => {
+    setImagesTouched(true);
+    setExistingImageUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveNewImage = (index: number) => {
+    setImagesTouched(true);
+    URL.revokeObjectURL(newImagePreviewUrls[index]);
+    setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewImagePreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -109,29 +153,20 @@ export default function NewProductModal({
     if (!trimmedName || !trimmedDescription) return;
     if (!Number.isFinite(parsedPrice) || !Number.isFinite(parsedStock)) return;
 
-    let imageUrl: string | undefined;
-    if (imageFile) {
+    let uploadedUrls: string[] = [];
+
+    if (newImageFiles.length > 0) {
       setIsImageUploading(true);
       setImageError('');
-      const formData = new FormData();
-      formData.append('file', imageFile);
 
       try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = (await response.json()) as { url?: string; message?: string };
-        if (!response.ok || !data.url) {
-          setImageError(data.message ?? '이미지 업로드에 실패했습니다.');
-          setIsImageUploading(false);
-          return;
-        }
-
-        imageUrl = data.url;
-      } catch {
-        setImageError('이미지 업로드에 실패했습니다.');
+        uploadedUrls = await Promise.all(newImageFiles.map(uploadImage));
+      } catch (uploadError) {
+        setImageError(
+          uploadError instanceof Error
+            ? uploadError.message
+            : '이미지 업로드에 실패했습니다.',
+        );
         setIsImageUploading(false);
         return;
       } finally {
@@ -139,13 +174,23 @@ export default function NewProductModal({
       }
     }
 
-    onSubmit({
+    const allImageUrls = [...existingImageUrls, ...uploadedUrls];
+    const payload: ProductFormValues = {
       name: trimmedName,
       description: trimmedDescription,
       price: parsedPrice,
       stock: parsedStock,
-      images: imageUrl ? [{ url: imageUrl }] : undefined,
-    });
+    };
+
+    if (!isEditMode && allImageUrls.length > 0) {
+      payload.images = allImageUrls.map((url) => ({ url }));
+    }
+
+    if (isEditMode && imagesTouched) {
+      payload.images = allImageUrls.map((url) => ({ url }));
+    }
+
+    onSubmit(payload);
   };
 
   return (
@@ -220,25 +265,60 @@ export default function NewProductModal({
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="new-product-image">
-            상품 이미지 (선택)
+            상품 이미지 (선택, 여러 장 가능)
           </label>
           <input
             id="new-product-image"
             type="file"
             accept="image/*"
+            multiple
             className={styles.fileInput}
             onChange={handleImageChange}
-            disabled={isPending || isImageUploading}
+            disabled={isPending || isImageUploading || totalImageCount >= MAX_IMAGES}
           />
-          {imagePreviewUrl && (
-            <Image
-              src={imagePreviewUrl}
-              alt="상품 이미지 미리보기"
-              width={480}
-              height={180}
-              unoptimized
-              className={styles.previewImage}
-            />
+          {totalImageCount > 0 && (
+            <div className={styles.previewList}>
+              {existingImageUrls.map((url, index) => (
+                <div key={`existing-${url}-${index}`} className={styles.previewItem}>
+                  <Image
+                    src={url}
+                    alt={`기존 상품 이미지 ${index + 1}`}
+                    width={480}
+                    height={180}
+                    unoptimized
+                    className={styles.previewImage}
+                  />
+                  <button
+                    type="button"
+                    className={styles.removeImageButton}
+                    onClick={() => handleRemoveExistingImage(index)}
+                    disabled={isPending || isImageUploading}
+                  >
+                    삭제
+                  </button>
+                </div>
+              ))}
+              {newImagePreviewUrls.map((url, index) => (
+                <div key={`new-${url}`} className={styles.previewItem}>
+                  <Image
+                    src={url}
+                    alt={`새 상품 이미지 ${index + 1}`}
+                    width={480}
+                    height={180}
+                    unoptimized
+                    className={styles.previewImage}
+                  />
+                  <button
+                    type="button"
+                    className={styles.removeImageButton}
+                    onClick={() => handleRemoveNewImage(index)}
+                    disabled={isPending || isImageUploading}
+                  >
+                    삭제
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
 
