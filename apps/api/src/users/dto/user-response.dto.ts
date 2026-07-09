@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {
   @ApiProperty()
@@ -17,7 +17,7 @@ export class UserResponseDto {
   declare createdAt: Date;
 }
 
-export class UserMeResponseDto extends OmitType(UserResponseDto, ['isAdmin']) {
+export class UserMeResponseDto extends UserResponseDto {
   @ApiProperty({ description: '유저 정보 수정 일시' })
   declare updatedAt: Date;
 }

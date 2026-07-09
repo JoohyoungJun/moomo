@@ -18,7 +18,7 @@ type Product = {
   stock: number;
   createdAt: string;
   updatedAt: string;
-  images: string[];
+  images: Array<string | { url: string }>;
 };
 
 type Me = {
@@ -141,6 +141,13 @@ export default function ProductDetailPage() {
     router.push('/me');
   };
 
+  const imageUrls = (product.images ?? [])
+    .map((image) => {
+      if (typeof image === 'string') return image.trim();
+      return image?.url?.trim();
+    })
+    .filter((url): url is string => Boolean(url));
+
   return (
     <main className={styles.page}>
       <Link href="/products" className={styles.backLink}>
@@ -159,13 +166,17 @@ export default function ProductDetailPage() {
         <p className={styles.content}>{product.description}</p>
 
         <div className={styles.images}>
-          {product.images.map((image) => (
+          {imageUrls.map((url) => (
             <Image
-              src={image}
-              key={image}
+              key={url}
+              src={url}
               alt={product.name}
-              width={100}
-              height={100}
+              width={1200}
+              height={800}
+              style={{
+                width: '100%',
+                height: 'auto',
+              }}
             />
           ))}
         </div>
