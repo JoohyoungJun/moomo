@@ -1,3 +1,5 @@
+'use client';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as styles from '../../me/MePage.css';
@@ -5,6 +7,7 @@ import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import NewProductModal from '@/components/modal/new-product-modal/NewProductModal';
 import { useState } from 'react';
+import { colors } from '@/styles/theme.css';
 
 type PaginatedResponse<T> = {
   items: T[];
@@ -37,6 +40,28 @@ type CreateProductBody = {
   images?: { url: string }[];
 };
 
+type UpdateProductBody = {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  images?: { url: string }[];
+};
+
+type ProductDetail = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  images: Array<string | { url: string }>;
+};
+
+function getImageUrl(image: string | { url: string }) {
+  if (typeof image === 'string') return image.trim();
+  return image.url?.trim() ?? '';
+}
+
 const ADMIN_NAV_ITEMS: { id: AdminTab; label: string }[] = [
   { id: 'products', label: '상품 관리' },
   { id: 'orders', label: '주문 관리' },
@@ -59,6 +84,8 @@ export default function AdminMePage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
+  const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const tabParam = searchParams.get('tab');
   const activeTab: AdminTab = isAdminTab(tabParam) ? tabParam : 'products';
   const pageParam = Number(searchParams.get('page') ?? '1');
@@ -83,6 +110,13 @@ export default function AdminMePage() {
   const products = productsData?.items ?? [];
   const productsMeta = productsData?.meta;
 
+  const { data: editingProductDetail } = useQuery({
+    queryKey: ['product', editingProduct?.id],
+    queryFn: () =>
+      apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
+    enabled: isEditingModalOpen && Boolean(editingProduct?.id),
+  });
+
   const createProductMutation = useMutation({
     mutationFn: (body: CreateProductBody) =>
       apiFetch('/products', {
@@ -94,6 +128,57 @@ export default function AdminMePage() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
   });
+
+  const updateProductMutation = useMutation({
+    mutationFn: ({
+      productId,
+      body,
+    }: {
+      productId: string;
+      body: UpdateProductBody;
+    }) =>
+      apiFetch(`/products/${productId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      setIsEditingModalOpen(false);
+      setEditingProduct(null);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error) => {
+      alert(`에러가 발생했습니다. ${error.message}`);
+    },
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: (productId: string) =>
+      apiFetch(`/products/${productId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error) => {
+      alert(`에러가 발생했습니다. ${error.message}`);
+    },
+  });
+
+  const handleClickDeleteProduct = (productId: string) => {
+    if (confirm('정말 삭제하시겠습니까?')) {
+      deleteProductMutation.mutate(productId);
+    }
+  };
+
+  const handleClickEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setIsEditingModalOpen(true);
+  };
+
+  const handleEditModalClose = () => {
+    setIsEditingModalOpen(false);
+    setEditingProduct(null);
+  };
 
   const handleTabChange = (tab: AdminTab) => {
     const params = new URLSearchParams();
@@ -159,21 +244,55 @@ export default function AdminMePage() {
                 <>
                   <div className={styles.list}>
                     {products.map((product) => (
-                      <Link
-                        key={product.id}
-                        href={`/products/${product.id}`}
-                        className={styles.listItem}
-                      >
-                        <h2 className={styles.listItemTitle}>{product.name}</h2>
+                      <div key={product.id} className={styles.listItem}>
+                        <Link
+                          href={`/products/${product.id}`}
+                          style={{
+                            textDecoration: 'none',
+                            color: 'inherit',
+                          }}
+                        >
+                          <h2 className={styles.listItemTitle}>
+                            {product.name}
+                          </h2>
 
-                        <div className={styles.listItemStats}>
-                          <span>재고 {product.stock}</span>
-                          <span>가격 {product.price}</span>
-                        </div>
+                          <div className={styles.listItemStats}>
+                            <span>재고 {product.stock}</span>
+                            <span>가격 {product.price}</span>
+                          </div>
+                        </Link>
+
                         <div className={styles.listItemMeta}>
                           <time>{formatDate(product.createdAt)}</time>
+                          <button
+                            type="button"
+                            style={{
+                              marginRight: '0.5rem',
+                              color: colors.primary,
+                              cursor: 'pointer',
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              padding: 0,
+                            }}
+                            onClick={() => handleClickEditProduct(product)}
+                          >
+                            수정
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              color: colors.danger,
+                              cursor: 'pointer',
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              padding: 0,
+                            }}
+                            onClick={() => handleClickDeleteProduct(product.id)}
+                          >
+                            삭제
+                          </button>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
 
@@ -206,13 +325,58 @@ export default function AdminMePage() {
         </div>
       </div>
       <NewProductModal
+        key="create-product"
         open={isNewProductModalOpen}
+        mode="create"
         onClose={() => setIsNewProductModalOpen(false)}
         onSubmit={(product) => createProductMutation.mutate(product)}
         isPending={createProductMutation.isPending}
         error={
           createProductMutation.isError
             ? createProductMutation.error.message
+            : undefined
+        }
+      />
+      <NewProductModal
+        key={
+          editingProduct
+            ? `edit-${editingProduct.id}-${editingProductDetail ? 'ready' : 'pending'}`
+            : 'edit-product'
+        }
+        open={isEditingModalOpen}
+        mode="edit"
+        initialValues={
+          editingProductDetail
+            ? {
+                name: editingProductDetail.name,
+                description: editingProductDetail.description,
+                price: editingProductDetail.price,
+                stock: editingProductDetail.stock,
+                imageUrl: editingProductDetail.images
+                  .map(getImageUrl)
+                  .find(Boolean),
+              }
+            : editingProduct
+              ? {
+                  name: editingProduct.name,
+                  description: editingProduct.description,
+                  price: editingProduct.price,
+                  stock: editingProduct.stock,
+                }
+              : undefined
+        }
+        onClose={handleEditModalClose}
+        onSubmit={(product) => {
+          if (!editingProduct) return;
+          updateProductMutation.mutate({
+            productId: editingProduct.id,
+            body: product,
+          });
+        }}
+        isPending={updateProductMutation.isPending}
+        error={
+          updateProductMutation.isError
+            ? updateProductMutation.error.message
             : undefined
         }
       />

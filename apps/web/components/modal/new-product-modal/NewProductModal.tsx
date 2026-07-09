@@ -5,7 +5,7 @@ import * as styles from './NewProductModal.css';
 import ModalLayout from '../modal-layout/ModalLayout';
 import Image from 'next/image';
 
-type NewProduct = {
+export type ProductFormValues = {
   name: string;
   description: string;
   price: number;
@@ -13,33 +13,53 @@ type NewProduct = {
   images?: { url: string }[];
 };
 
+type ProductFormInitialValues = {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;
+};
+
 type NewProductModalProps = {
   open: boolean;
+  mode?: 'create' | 'edit';
+  initialValues?: ProductFormInitialValues;
   onClose: () => void;
-  onSubmit: (product: NewProduct) => void;
+  onSubmit: (product: ProductFormValues) => void;
   isPending?: boolean;
   error?: string;
 };
 
 export default function NewProductModal({
   open,
+  mode = 'create',
+  initialValues,
   onClose,
   onSubmit,
   isPending = false,
   error = '',
 }: NewProductModalProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [stock, setStock] = useState('');
+  const [name, setName] = useState(initialValues?.name ?? '');
+  const [description, setDescription] = useState(
+    initialValues?.description ?? '',
+  );
+  const [price, setPrice] = useState(
+    initialValues ? String(initialValues.price) : '',
+  );
+  const [stock, setStock] = useState(
+    initialValues ? String(initialValues.stock) : '',
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(
+    initialValues?.imageUrl ?? '',
+  );
   const [imageError, setImageError] = useState('');
   const [isImageUploading, setIsImageUploading] = useState(false);
 
-  if (!open) return null;
+  const isEditMode = mode === 'edit';
 
-  const handleClose = () => {
+  const resetForm = () => {
     setName('');
     setDescription('');
     setPrice('');
@@ -47,6 +67,12 @@ export default function NewProductModal({
     setImageFile(null);
     setImagePreviewUrl('');
     setImageError('');
+  };
+
+  if (!open) return null;
+
+  const handleClose = () => {
+    resetForm();
     onClose();
   };
 
@@ -125,9 +151,13 @@ export default function NewProductModal({
   return (
     <ModalLayout onClose={handleClose} titleId="new-product-title">
       <h2 id="new-product-title" className={styles.title}>
-        상품 등록
+        {isEditMode ? '상품 수정' : '상품 등록'}
       </h2>
-      <p className={styles.description}>등록할 상품 정보를 입력해 주세요.</p>
+      <p className={styles.description}>
+        {isEditMode
+          ? '수정할 상품 정보를 입력해 주세요.'
+          : '등록할 상품 정보를 입력해 주세요.'}
+      </p>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.field}>
@@ -236,7 +266,15 @@ export default function NewProductModal({
               !stock.trim()
             }
           >
-            {isImageUploading ? '이미지 업로드 중...' : isPending ? '등록 중...' : '등록'}
+            {isImageUploading
+              ? '이미지 업로드 중...'
+              : isPending
+                ? isEditMode
+                  ? '수정 중...'
+                  : '등록 중...'
+                : isEditMode
+                  ? '수정'
+                  : '등록'}
           </button>
         </div>
       </form>
