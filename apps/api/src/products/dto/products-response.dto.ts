@@ -65,3 +65,23 @@ export class OrderProductResponseDto {
   @ApiProperty({ description: '주문 생성일' })
   declare createdAt: Date;
 }
+
+export class UserOrderResponseDto {
+  @ApiProperty({ description: '주문 id' })
+  declare id: string;
+
+  @ApiProperty({ description: '상품 id' })
+  declare productId: string;
+
+  @ApiProperty({ description: '상품 이름' })
+  declare productName: string;
+
+  @ApiProperty({ description: '주문 수량' })
+  declare quantity: number;
+
+  @ApiProperty({ description: '주문 가격' })
+  declare totalPrice: number;
+
+  @ApiProperty({ description: '주문 생성일' })
+  declare createdAt: Date;
+}

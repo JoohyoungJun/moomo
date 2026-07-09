@@ -43,6 +43,7 @@ export class UsersService {
       email: user.email,
       nickname: user.nickname,
       createdAt: user.createdAt,
+      isAdmin: user.isAdmin,
       updatedAt: user.updatedAt,
     };
   }
@@ -131,6 +132,7 @@ export class UsersService {
       id: updated.id,
       email: updated.email,
       nickname: updated.nickname,
+      isAdmin: updated.isAdmin,
       createdAt: updated.createdAt,
       updatedAt: updated.updatedAt,
     };

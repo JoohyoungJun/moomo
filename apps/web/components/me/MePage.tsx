@@ -45,7 +45,22 @@ type MyComment = {
   createdAt: string;
 };
 
-type MeTab = 'profile' | 'password' | 'posts' | 'comments' | 'account-delete';
+type MyOrder = {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  totalPrice: number;
+  createdAt: string;
+};
+
+type MeTab =
+  | 'profile'
+  | 'password'
+  | 'posts'
+  | 'comments'
+  | 'orders'
+  | 'account-delete';
 
 const PAGE_SIZE = 4;
 
@@ -54,6 +69,7 @@ const NAV_ITEMS: { id: MeTab; label: string }[] = [
   { id: 'password', label: '비밀번호 변경' },
   { id: 'posts', label: '내가 쓴 게시글' },
   { id: 'comments', label: '내가 쓴 댓글' },
+  { id: 'orders', label: '주문 조회' },
   { id: 'account-delete', label: '회원탈퇴' },
 ];
 
@@ -63,6 +79,7 @@ function isMeTab(value: string | null): value is MeTab {
     'password',
     'posts',
     'comments',
+    'orders',
     'account-delete',
   ].includes(value ?? '');
 }
@@ -124,6 +141,20 @@ export default function MePage() {
         `/users/me/comments?page=${currentPage}&pageSize=${PAGE_SIZE}`,
       ),
     enabled: activeTab === 'comments',
+  });
+
+  const {
+    data: myOrdersData,
+    isLoading: isOrdersLoading,
+    isError: isOrdersError,
+    error: ordersError,
+  } = useQuery({
+    queryKey: ['me', 'orders', currentPage],
+    queryFn: () =>
+      apiFetch<PaginatedResponse<MyOrder>>(
+        `/products/orders?page=${currentPage}&pageSize=${PAGE_SIZE}`,
+      ),
+    enabled: activeTab === 'orders',
   });
 
   const [email, setEmail] = useState('');
@@ -205,6 +236,8 @@ export default function MePage() {
   const myPostsMeta = myPostsData?.meta;
   const myComments = myCommentsData?.items ?? [];
   const myCommentsMeta = myCommentsData?.meta;
+  const myOrders = myOrdersData?.items ?? [];
+  const myOrdersMeta = myOrdersData?.meta;
 
   const handleAccountDeleteOpen = () => {
     setIsAccountDeleteModalOpen(true);
@@ -502,6 +535,74 @@ export default function MePage() {
                       )}
                     </>
                   )}
+              </>
+            )}
+            {activeTab === 'orders' && (
+              <>
+                <h1 className={styles.sectionTitle}>주문 조회</h1>
+
+                {isOrdersLoading && (
+                  <p className={styles.state}>주문을 불러오는중...</p>
+                )}
+
+                {isOrdersError && (
+                  <p className={styles.error}>{ordersError.message}</p>
+                )}
+
+                {!isOrdersLoading &&
+                  !isOrdersError &&
+                  myOrders.length === 0 && (
+                    <p className={styles.state}>주문한 상품이 없습니다.</p>
+                  )}
+
+                {!isOrdersLoading && !isOrdersError && myOrders.length > 0 && (
+                  <>
+                    <div className={styles.list}>
+                      {myOrders.map((order) => (
+                        <Link
+                          key={order.id}
+                          href={`/products/${order.productId}`}
+                          className={styles.listItem}
+                        >
+                          <h2 className={styles.listItemTitle}>
+                            {order.productName}
+                          </h2>
+
+                          <div className={styles.listItemStats}>
+                            <span>수량 {order.quantity}</span>
+                            <span>총 가격 {order.totalPrice}</span>
+                          </div>
+                          <div className={styles.listItemMeta}>
+                            <time>{formatDate(order.createdAt)}</time>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    {myOrdersMeta && myOrdersMeta.totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        <button
+                          type="button"
+                          className={styles.pageButton}
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={!myOrdersMeta.hasPrev}
+                        >
+                          이전
+                        </button>
+                        <span className={styles.pageInfo}>
+                          {myOrdersMeta.page} / {myOrdersMeta.totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          className={styles.pageButton}
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={!myOrdersMeta.hasNext}
+                        >
+                          다음
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </>
             )}
             {activeTab === 'account-delete' && (

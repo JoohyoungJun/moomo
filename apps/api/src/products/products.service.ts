@@ -28,6 +28,7 @@ import {
   buildPaginationResponse,
   getPaginationParams,
 } from '@/common/pagination/pagination.util';
+import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 
 @Injectable()
 export class ProductsService {
@@ -266,5 +267,27 @@ export class ProductsService {
       totalPrice: order.totalPrice,
       createdAt: order.createdAt,
     };
+  }
+
+  async getOrdersByUserId(userId: string, query: PaginationQueryDto) {
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+
+    const { items, total } = await this.productsRepository.findOrdersByUserId(
+      userId,
+      skip,
+      take,
+    );
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      productId: item.productId,
+      productName: item.product.name,
+      productPrice: item.product.price,
+      quantity: item.quantity,
+      totalPrice: item.totalPrice,
+      createdAt: item.createdAt,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
   }
 }
