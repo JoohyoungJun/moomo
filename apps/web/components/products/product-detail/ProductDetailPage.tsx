@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/api';
 import * as styles from './ProductDetailPage.css';
 import Image from 'next/image';
 import OrderModal from '@/components/modal/order-modal/OrderModal';
+import OrderCompleteModal from '@/components/modal/order-complete-modal/OrderCompleteModal';
 
 type Product = {
   id: string;
@@ -41,6 +42,7 @@ export default function ProductDetailPage() {
 
   const [quantity, setQuantity] = useState(1);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
   const { data: me } = useQuery({
     queryKey: ['me'],
@@ -67,9 +69,10 @@ export default function ProductDetailPage() {
       }),
     onSuccess: () => {
       setIsOrderModalOpen(false);
+      setIsCompleteModalOpen(true);
     },
     onError: (error) => {
-      alert(error.message);
+      alert(`에러가 발생했습니다. ${error.message}`);
     },
   });
 
@@ -129,6 +132,15 @@ export default function ProductDetailPage() {
     setQuantity((prev) => Math.max(prev - 1, 1));
   };
 
+  const handleCompleteModalClose = () => {
+    setIsCompleteModalOpen(false);
+  };
+
+  const handleCompleteModalConfirm = () => {
+    setIsCompleteModalOpen(false);
+    router.push('/me');
+  };
+
   return (
     <main className={styles.page}>
       <Link href="/products" className={styles.backLink}>
@@ -183,6 +195,11 @@ export default function ProductDetailPage() {
         onSubmit={handleOrder}
         isPending={orderMutation.isPending}
         error={orderMutation.error?.message}
+      />
+      <OrderCompleteModal
+        open={isCompleteModalOpen}
+        onClose={handleCompleteModalClose}
+        onConfirm={handleCompleteModalConfirm}
       />
     </main>
   );
