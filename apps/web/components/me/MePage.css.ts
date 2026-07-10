@@ -245,6 +245,12 @@ export const listItemStats = style({
   color: colors.textMuted,
 });
 
+export const listItemText = style({
+  fontSize: '13px',
+  color: colors.textMuted,
+  fontWeight: 700,
+});
+
 export const pagination = style({
   display: 'flex',
   alignItems: 'center',
