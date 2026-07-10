@@ -49,6 +49,7 @@ type MyOrder = {
   id: string;
   productId: string;
   productName: string;
+  productPrice: number;
   quantity: number;
   totalPrice: number;
   createdAt: string;
@@ -569,11 +570,28 @@ export default function MePage() {
                           </h2>
 
                           <div className={styles.listItemStats}>
-                            <span>수량 {order.quantity}</span>
-                            <span>총 가격 {order.totalPrice}</span>
+                            <span>
+                              <span className={styles.listItemText}>수량:</span>{' '}
+                              {order.quantity}
+                            </span>
+                            <span>
+                              <span className={styles.listItemText}>가격:</span>{' '}
+                              {order.productPrice}
+                            </span>
+                            <span>
+                              <span className={styles.listItemText}>
+                                총 가격:
+                              </span>{' '}
+                              {order.totalPrice}
+                            </span>
                           </div>
                           <div className={styles.listItemMeta}>
-                            <time>{formatDate(order.createdAt)}</time>
+                            <span>
+                              <span className={styles.listItemText}>
+                                주문일자:
+                              </span>{' '}
+                              <time>{formatDate(order.createdAt)}</time>
+                            </span>
                           </div>
                         </Link>
                       ))}
