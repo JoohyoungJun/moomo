@@ -52,6 +52,7 @@ type MyOrder = {
   productPrice: number;
   quantity: number;
   totalPrice: number;
+  status: string;
   createdAt: string;
 };
 
@@ -64,6 +65,14 @@ type MeTab =
   | 'account-delete';
 
 const PAGE_SIZE = 4;
+
+type OrderStatus = 'pending' | 'completed' | 'cancelled';
+
+const ORDER_STATUS: { id: OrderStatus; label: string }[] = [
+  { id: 'pending', label: '처리중' },
+  { id: 'completed', label: '처리 완료' },
+  { id: 'cancelled', label: '취소' },
+];
 
 const NAV_ITEMS: { id: MeTab; label: string }[] = [
   { id: 'profile', label: '내 정보' },
@@ -585,6 +594,16 @@ export default function MePage() {
                                 주문일자:
                               </span>{' '}
                               <time>{formatDate(order.createdAt)}</time>
+                            </span>
+                            <span>
+                              <span className={styles.listItemText}>
+                                주문 상태:
+                              </span>{' '}
+                              {
+                                ORDER_STATUS.find(
+                                  (status) => status.id === order.status,
+                                )?.label
+                              }
                             </span>
                           </div>
                         </Link>
