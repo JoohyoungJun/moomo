@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import AccountDeleteModal from '@/components/modal/account-delete-modal/AccountDeleteModal';
 import * as styles from './MePage.css';
 
@@ -52,6 +52,7 @@ type MyOrder = {
   productPrice: number;
   quantity: number;
   totalPrice: number;
+  status: string;
   createdAt: string;
 };
 
@@ -64,6 +65,14 @@ type MeTab =
   | 'account-delete';
 
 const PAGE_SIZE = 4;
+
+type OrderStatus = 'pending' | 'completed' | 'cancelled';
+
+const ORDER_STATUS: { id: OrderStatus; label: string }[] = [
+  { id: 'pending', label: '처리중' },
+  { id: 'completed', label: '처리 완료' },
+  { id: 'cancelled', label: '취소' },
+];
 
 const NAV_ITEMS: { id: MeTab; label: string }[] = [
   { id: 'profile', label: '내 정보' },
@@ -162,12 +171,6 @@ export default function MePage() {
   const [nickname, setNickname] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-
-  useEffect(() => {
-    if (!me) return;
-    setEmail(me.email);
-    setNickname(me.nickname);
-  }, [me]);
 
   const updateProfileMutation = useMutation({
     mutationFn: (body: { email?: string; nickname?: string }) =>
@@ -588,9 +591,31 @@ export default function MePage() {
                           <div className={styles.listItemMeta}>
                             <span>
                               <span className={styles.listItemText}>
-                                주문일자:
+                                주문 일자:
                               </span>{' '}
                               <time>{formatDate(order.createdAt)}</time>
+                            </span>
+                            <span>
+                              <span className={styles.listItemText}>
+                                주문 상태:
+                              </span>{' '}
+                              <span
+                                className={
+                                  order.status === 'pending'
+                                    ? styles.listItemTextPending
+                                    : order.status === 'completed'
+                                      ? styles.listItemTextCompleted
+                                      : order.status === 'cancelled'
+                                        ? styles.listItemTextCancelled
+                                        : ''
+                                }
+                              >
+                                {
+                                  ORDER_STATUS.find(
+                                    (status) => status.id === order.status,
+                                  )?.label
+                                }
+                              </span>
                             </span>
                           </div>
                         </Link>

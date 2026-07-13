@@ -5,6 +5,7 @@ import {
   ProductImageRequestDto,
   UpdateProductRequestDto,
 } from './dto/products-request.dto';
+import { OrderStatus } from '@prisma/client';
 
 @Injectable()
 export class ProductsRepository {
@@ -136,6 +137,13 @@ export class ProductsRepository {
   findOrderById(id: string) {
     return this.prisma.order.findUnique({
       where: { id },
+      include: {
+        product: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
   }
 
@@ -159,5 +167,12 @@ export class ProductsRepository {
     ]);
 
     return { items, total };
+  }
+
+  updateOrderStatus(id: string, status: OrderStatus) {
+    return this.prisma.order.update({
+      where: { id },
+      data: { status },
+    });
   }
 }

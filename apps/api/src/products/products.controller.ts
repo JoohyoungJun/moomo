@@ -19,11 +19,13 @@ import {
   OrderProductResponseDto,
   ProductListResponseDto,
   ProductResponseDto,
+  UpdateOrderResponseDto,
   UserOrderResponseDto,
 } from './dto/products-response.dto';
 import { ApiErrorResponse } from '@/common/decorators/api-error-response.decorator';
 import {
   COMMON_ERRORS,
+  ORDERS_ERRORS,
   PRODUCTS_ERRORS,
   USERS_ERRORS,
 } from '@/common/constants/errors';
@@ -34,6 +36,7 @@ import {
   CreateProductRequestDto,
   OrderProductRequestDto,
   ProductsQueryDto,
+  UpdateOrderStatusRequestDto,
   UpdateProductRequestDto,
 } from './dto/products-request.dto';
 import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
@@ -171,6 +174,28 @@ export class ProductsController {
       req.user.id,
       productId,
       body.quantity,
+    );
+  }
+
+  @ApiOperation({ summary: '주문 상태 수정 (관리자용)' })
+  @ApiSuccessResponse(HttpStatus.OK, UpdateOrderResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(USERS_ERRORS.USER_NOT_FOUND, ORDERS_ERRORS.ORDER_NOT_FOUND)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch('orders/:id/status')
+  updateOrder(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Param('id') orderId: string,
+    @Body() body: UpdateOrderStatusRequestDto,
+  ) {
+    return this.productsService.updateOrderStatus(
+      req.user.id,
+      orderId,
+      body.status,
     );
   }
 }
