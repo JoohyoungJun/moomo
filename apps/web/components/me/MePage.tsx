@@ -591,7 +591,7 @@ export default function MePage() {
                           <div className={styles.listItemMeta}>
                             <span>
                               <span className={styles.listItemText}>
-                                주문일자:
+                                주문 일자:
                               </span>{' '}
                               <time>{formatDate(order.createdAt)}</time>
                             </span>
@@ -599,11 +599,23 @@ export default function MePage() {
                               <span className={styles.listItemText}>
                                 주문 상태:
                               </span>{' '}
-                              {
-                                ORDER_STATUS.find(
-                                  (status) => status.id === order.status,
-                                )?.label
-                              }
+                              <span
+                                className={
+                                  order.status === 'pending'
+                                    ? styles.listItemTextPending
+                                    : order.status === 'completed'
+                                      ? styles.listItemTextCompleted
+                                      : order.status === 'cancelled'
+                                        ? styles.listItemTextCancelled
+                                        : ''
+                                }
+                              >
+                                {
+                                  ORDER_STATUS.find(
+                                    (status) => status.id === order.status,
+                                  )?.label
+                                }
+                              </span>
                             </span>
                           </div>
                         </Link>

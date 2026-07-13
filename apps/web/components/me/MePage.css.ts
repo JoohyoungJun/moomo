@@ -251,6 +251,18 @@ export const listItemText = style({
   fontWeight: 700,
 });
 
+export const listItemTextPending = style({
+  color: '#16a34a',
+});
+
+export const listItemTextCompleted = style({
+  color: colors.primary,
+});
+
+export const listItemTextCancelled = style({
+  color: colors.danger,
+});
+
 export const pagination = style({
   display: 'flex',
   alignItems: 'center',
