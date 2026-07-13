@@ -285,6 +285,7 @@ export class ProductsService {
       productPrice: item.product.price,
       quantity: item.quantity,
       totalPrice: item.totalPrice,
+      status: item.status,
       createdAt: item.createdAt,
     }));
 

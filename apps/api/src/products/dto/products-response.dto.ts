@@ -82,6 +82,9 @@ export class UserOrderResponseDto {
   @ApiProperty({ description: '주문 가격' })
   declare totalPrice: number;
 
+  @ApiProperty({ description: '주문 상태' })
+  declare status: string;
+
   @ApiProperty({ description: '주문 생성일' })
   declare createdAt: Date;
 }
