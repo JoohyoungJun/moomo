@@ -14,13 +14,16 @@ import {
   ProductsQueryDto,
   UpdateProductRequestDto,
 } from './dto/products-request.dto';
+import { OrderStatus } from '@prisma/client';
 import {
   OrderProductResponseDto,
   ProductResponseDto,
+  UpdateOrderResponseDto,
 } from './dto/products-response.dto';
 import { AppException } from '@/common/exception/app.exception';
 import {
   COMMON_ERRORS,
+  ORDERS_ERRORS,
   PRODUCTS_ERRORS,
   USERS_ERRORS,
 } from '@/common/constants/errors';
@@ -290,5 +293,38 @@ export class ProductsService {
     }));
 
     return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
+  async updateOrderStatus(
+    userId: string,
+    orderId: string,
+    status: OrderStatus,
+  ): Promise<UpdateOrderResponseDto> {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    if (!user.isAdmin) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    const order = await this.productsRepository.findOrderById(orderId);
+
+    if (order === null) {
+      throw new AppException(ORDERS_ERRORS.ORDER_NOT_FOUND);
+    }
+
+    const updated = await this.productsRepository.updateOrderStatus(
+      orderId,
+      status,
+    );
+
+    return {
+      id: updated.id,
+      status: updated.status,
+      updatedAt: updated.updatedAt,
+    };
   }
 }

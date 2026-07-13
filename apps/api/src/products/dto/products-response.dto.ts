@@ -1,4 +1,5 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { OrderStatus } from '@prisma/client';
 
 export class ProductImageResponseDto {
   @ApiProperty({ format: 'uuid' })
@@ -82,9 +83,29 @@ export class UserOrderResponseDto {
   @ApiProperty({ description: '주문 가격' })
   declare totalPrice: number;
 
-  @ApiProperty({ description: '주문 상태' })
-  declare status: string;
+  @ApiProperty({
+    description: '주문 상태',
+    enum: OrderStatus,
+  })
+  declare status: OrderStatus;
 
   @ApiProperty({ description: '주문 생성일' })
   declare createdAt: Date;
+}
+
+export class UpdateOrderResponseDto extends OmitType(UserOrderResponseDto, [
+  'productId',
+  'productName',
+  'quantity',
+  'totalPrice',
+  'createdAt',
+]) {
+  @ApiProperty({
+    description: '주문 상태',
+    enum: OrderStatus,
+  })
+  declare status: OrderStatus;
+
+  @ApiProperty({ description: '주문 수정일' })
+  declare updatedAt: Date;
 }

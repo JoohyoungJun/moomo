@@ -203,3 +203,11 @@ export const PRODUCTS_ERRORS = {
     code: 'PRODUCT_DESCRIPTION_INVALID',
   },
 };
+
+export const ORDERS_ERRORS = {
+  ORDER_NOT_FOUND: {
+    status: HttpStatus.NOT_FOUND,
+    message: '주문을 찾을 수 없습니다.',
+    code: 'ORDER_NOT_FOUND',
+  },
+};
