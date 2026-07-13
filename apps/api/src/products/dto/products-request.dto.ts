@@ -1,8 +1,10 @@
 import { PaginationQueryDto } from '@/common/pagination/pagination-query.dto';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { OrderStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -11,6 +13,8 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+
+export { OrderStatus };
 
 export const MIN_PRODUCT_PRICE = 0;
 export const MAX_PRODUCT_PRICE = 100_000_000;
@@ -75,4 +79,12 @@ export class OrderProductRequestDto {
   @IsNumber()
   @IsNotEmpty()
   declare quantity: number;
+}
+
+export class UpdateOrderStatusRequestDto {
+  @ApiProperty({ description: '주문 상태' })
+  @IsString()
+  @IsNotEmpty()
+  @IsEnum(OrderStatus)
+  declare status: OrderStatus;
 }

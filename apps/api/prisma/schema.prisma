@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrderStatus {
+  pending
+  completed
+  cancelled
+}
+
 model User {
   id           String  @id @default(uuid())
   email        String  @unique
@@ -109,15 +115,15 @@ model Image {
 }
 
 model Order {
-  id         String   @id @default(uuid())
+  id         String      @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId  String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity   Int
   totalPrice Int
-  status     String   @default("pending")
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status     OrderStatus @default(pending)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
