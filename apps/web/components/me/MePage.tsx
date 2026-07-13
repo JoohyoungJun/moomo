@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import AccountDeleteModal from '@/components/modal/account-delete-modal/AccountDeleteModal';
 import * as styles from './MePage.css';
 
@@ -162,12 +162,6 @@ export default function MePage() {
   const [nickname, setNickname] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-
-  useEffect(() => {
-    if (!me) return;
-    setEmail(me.email);
-    setNickname(me.nickname);
-  }, [me]);
 
   const updateProfileMutation = useMutation({
     mutationFn: (body: { email?: string; nickname?: string }) =>
