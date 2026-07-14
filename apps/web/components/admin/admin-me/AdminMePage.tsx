@@ -31,6 +31,17 @@ export type Product = {
   updatedAt: string;
 };
 
+export type Order = {
+  id: string;
+  userId: string;
+  productId: string;
+  quantity: number;
+  totalPrice: number;
+  status: 'pending' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+};
+
 type AdminTab = 'products' | 'orders';
 type CreateProductBody = {
   name: string;
@@ -107,13 +118,26 @@ export default function AdminMePage() {
     enabled: activeTab === 'products',
   });
 
+  const {
+    data: ordersData,
+    isLoading: isOrdersLoading,
+    isError: isOrdersError,
+    error: ordersError,
+  } = useQuery({
+    queryKey: ['orders', currentPage, PAGE_SIZE],
+    queryFn: () =>
+      apiFetch<PaginatedResponse<Order>>(
+        `/products/orders/all?page=${currentPage}&pageSize=${PAGE_SIZE}`,
+      ),
+    enabled: activeTab === 'orders',
+  });
+
   const products = productsData?.items ?? [];
   const productsMeta = productsData?.meta;
 
   const { data: editingProductDetail } = useQuery({
     queryKey: ['product', editingProduct?.id],
-    queryFn: () =>
-      apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
+    queryFn: () => apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
     enabled: isEditingModalOpen && Boolean(editingProduct?.id),
   });
 

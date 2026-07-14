@@ -93,6 +93,17 @@ export class UserOrderResponseDto {
   declare createdAt: Date;
 }
 
+export class OrderListResponseDto extends UserOrderResponseDto {
+  @ApiProperty({ description: '주문자 id' })
+  declare userId: string;
+
+  @ApiProperty({ description: '주문자 닉네임' })
+  declare userNickname: string;
+
+  @ApiProperty({ description: '상품 가격' })
+  declare productPrice: number;
+}
+
 export class UpdateOrderResponseDto extends OmitType(UserOrderResponseDto, [
   'productId',
   'productName',

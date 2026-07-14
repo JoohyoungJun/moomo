@@ -134,6 +134,32 @@ export class ProductsRepository {
     return { product, order };
   }
 
+  async findAllOrders(skip: number, take: number) {
+    const [items, total] = await Promise.all([
+      this.prisma.order.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              nickname: true,
+            },
+          },
+          product: {
+            select: {
+              name: true,
+              price: true,
+            },
+          },
+        },
+      }),
+      this.prisma.order.count(),
+    ]);
+
+    return { items, total };
+  }
+
   findOrderById(id: string) {
     return this.prisma.order.findUnique({
       where: { id },
