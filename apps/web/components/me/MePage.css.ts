@@ -252,7 +252,7 @@ export const listItemText = style({
 });
 
 export const listItemTextPending = style({
-  color: '#16a34a',
+  color: colors.pending,
 });
 
 export const listItemTextCompleted = style({

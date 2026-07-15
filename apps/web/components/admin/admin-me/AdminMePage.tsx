@@ -7,7 +7,6 @@ import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import NewProductModal from '@/components/modal/new-product-modal/NewProductModal';
 import { useState } from 'react';
-import { colors } from '@/styles/theme.css';
 import { ORDER_STATUS } from '@/components/me/MePage';
 
 type PaginatedResponse<T> = {
