@@ -120,3 +120,8 @@ export class UpdateOrderResponseDto extends OmitType(UserOrderResponseDto, [
   @ApiProperty({ description: '주문 수정일' })
   declare updatedAt: Date;
 }
+
+export class DeleteOrderResponseDto {
+  @ApiProperty({ description: '삭제 확인 메시지' })
+  declare message: string;
+}

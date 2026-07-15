@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
+  DeleteOrderResponseDto,
   OrderListResponseDto,
   OrderProductResponseDto,
   ProductListResponseDto,
@@ -215,5 +216,21 @@ export class ProductsController {
       orderId,
       body.status,
     );
+  }
+
+  @ApiOperation({ summary: '주문 삭제 (관리자용)' })
+  @ApiSuccessResponse(HttpStatus.OK, DeleteOrderResponseDto)
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(USERS_ERRORS.USER_NOT_FOUND, ORDERS_ERRORS.ORDER_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete('orders/:id')
+  deleteOrder(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Param('id') orderId: string,
+  ) {
+    return this.productsService.deleteOrder(req.user.id, orderId);
   }
 }

@@ -201,4 +201,10 @@ export class ProductsRepository {
       data: { status },
     });
   }
+
+  deleteOrder(id: string) {
+    return this.prisma.order.delete({
+      where: { id },
+    });
+  }
 }

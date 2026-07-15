@@ -216,7 +216,10 @@ export default function AdminMePage() {
   };
 
   const handleClickDeleteOrder = (order: Order, orderId: string) => {
-    if (!confirm('정말 삭제하시겠습니까? ')) return;
+    if (
+      !confirm('주문을 삭제하시겠습니까? \n취소된 주문만 삭제할 수 있습니다.')
+    )
+      return;
     if (order.status !== 'cancelled') {
       alert('취소된 주문만 삭제할 수 있습니다.');
       return;
