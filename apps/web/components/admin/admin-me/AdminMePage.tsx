@@ -295,27 +295,14 @@ export default function AdminMePage() {
                           <time>{formatDate(product.createdAt)}</time>
                           <button
                             type="button"
-                            style={{
-                              marginRight: '0.5rem',
-                              color: colors.primary,
-                              cursor: 'pointer',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                            }}
+                            className={styles.editButton}
                             onClick={() => handleClickEditProduct(product)}
                           >
                             수정
                           </button>
                           <button
                             type="button"
-                            style={{
-                              color: colors.danger,
-                              cursor: 'pointer',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                            }}
+                            className={styles.deleteButton}
                             onClick={() => handleClickDeleteProduct(product.id)}
                           >
                             삭제
