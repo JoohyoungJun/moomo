@@ -23,7 +23,8 @@ export const center = style({
 });
 
 export const logo = style({
-  margin: '0 0 auto',
+  margin: 0,
+  textAlign: 'center',
   fontSize: '44px',
   fontWeight: 800,
   letterSpacing: '-0.03em',
