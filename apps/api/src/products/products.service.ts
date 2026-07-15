@@ -16,6 +16,7 @@ import {
 } from './dto/products-request.dto';
 import { OrderStatus } from '@prisma/client';
 import {
+  DeleteOrderResponseDto,
   OrderProductResponseDto,
   ProductResponseDto,
   UpdateOrderResponseDto,
@@ -359,6 +360,33 @@ export class ProductsService {
       id: updated.id,
       status: updated.status,
       updatedAt: updated.updatedAt,
+    };
+  }
+
+  async deleteOrder(
+    userId: string,
+    orderId: string,
+  ): Promise<DeleteOrderResponseDto> {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    if (!user.isAdmin) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    const order = await this.productsRepository.findOrderById(orderId);
+
+    if (order === null) {
+      throw new AppException(ORDERS_ERRORS.ORDER_NOT_FOUND);
+    }
+
+    await this.productsRepository.deleteOrder(orderId);
+
+    return {
+      message: '주문 삭제 성공',
     };
   }
 }
