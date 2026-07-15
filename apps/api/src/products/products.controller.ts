@@ -16,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
+  OrderListResponseDto,
   OrderProductResponseDto,
   ProductListResponseDto,
   ProductResponseDto,
@@ -175,6 +176,23 @@ export class ProductsController {
       productId,
       body.quantity,
     );
+  }
+
+  @ApiOperation({ summary: '주문 목록 조회 (관리자용)' })
+  @ApiSuccessResponse(HttpStatus.OK, [OrderListResponseDto])
+  @ApiErrorResponse(COMMON_ERRORS.INTERNAL_SERVER_ERROR)
+  @ApiErrorResponse(COMMON_ERRORS.FORBIDDEN)
+  @ApiErrorResponse(COMMON_ERRORS.UNAUTHORIZED)
+  @ApiErrorResponse(COMMON_ERRORS.VALIDATION_ERROR)
+  @ApiErrorResponse(USERS_ERRORS.USER_NOT_FOUND)
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('orders/all')
+  getAllOrders(
+    @Req() req: Request & { user: JwtAccessUser },
+    @Query() query: PaginationQueryDto,
+  ) {
+    return this.productsService.getAllOrders(req.user.id, query);
   }
 
   @ApiOperation({ summary: '주문 상태 수정 (관리자용)' })

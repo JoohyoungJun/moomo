@@ -8,6 +8,7 @@ import Link from 'next/link';
 import NewProductModal from '@/components/modal/new-product-modal/NewProductModal';
 import { useState } from 'react';
 import { colors } from '@/styles/theme.css';
+import { ORDER_STATUS } from '@/components/me/MePage';
 
 type PaginatedResponse<T> = {
   items: T[];
@@ -29,6 +30,19 @@ export type Product = {
   stock: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type Order = {
+  id: string;
+  userId: string;
+  userNickname: string;
+  productId: string;
+  productName: string;
+  productPrice: number;
+  quantity: number;
+  totalPrice: number;
+  status: 'pending' | 'completed' | 'cancelled';
+  createdAt: string;
 };
 
 type AdminTab = 'products' | 'orders';
@@ -107,13 +121,28 @@ export default function AdminMePage() {
     enabled: activeTab === 'products',
   });
 
+  const {
+    data: ordersData,
+    isLoading: isOrdersLoading,
+    isError: isOrdersError,
+    error: ordersError,
+  } = useQuery({
+    queryKey: ['orders', currentPage, PAGE_SIZE],
+    queryFn: () =>
+      apiFetch<PaginatedResponse<Order>>(
+        `/products/orders/all?page=${currentPage}&pageSize=${PAGE_SIZE}`,
+      ),
+    enabled: activeTab === 'orders',
+  });
+
   const products = productsData?.items ?? [];
   const productsMeta = productsData?.meta;
+  const orders = ordersData?.items ?? [];
+  const ordersMeta = ordersData?.meta;
 
   const { data: editingProductDetail } = useQuery({
     queryKey: ['product', editingProduct?.id],
-    queryFn: () =>
-      apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
+    queryFn: () => apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
     enabled: isEditingModalOpen && Boolean(editingProduct?.id),
   });
 
@@ -314,6 +343,113 @@ export default function AdminMePage() {
                         className={styles.pageButton}
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={!productsMeta.hasNext}
+                      >
+                        다음
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
+            {activeTab === 'orders' && isOrdersLoading && (
+              <p className={styles.state}>주문 내역 불러오는중...</p>
+            )}
+
+            {activeTab === 'orders' && isOrdersError && (
+              <p className={styles.error}>{ordersError.message}</p>
+            )}
+
+            {activeTab === 'orders' &&
+              !isOrdersError &&
+              !isOrdersLoading &&
+              orders.length === 0 && (
+                <p className={styles.state}>주문이 없습니다.</p>
+              )}
+
+            {activeTab === 'orders' &&
+              !isOrdersError &&
+              !isOrdersLoading &&
+              orders.length > 0 && (
+                <>
+                  <div className={styles.list}>
+                    {orders.map((order) => (
+                      <div key={order.id} className={styles.listItem}>
+                        <h2 className={styles.listItemTitle}>
+                          {order.productName}
+                        </h2>
+
+                        <div className={styles.listItemStats}>
+                          <span>
+                            <span className={styles.listItemText}>주문자:</span>{' '}
+                            {order.userNickname}
+                          </span>
+                          <span>
+                            <span className={styles.listItemText}>
+                              상품 가격:
+                            </span>{' '}
+                            {order.productPrice}
+                          </span>
+                          <span>
+                            <span className={styles.listItemText}>
+                              주문 수량:
+                            </span>{' '}
+                            {order.quantity}
+                          </span>
+                          <span>
+                            <span className={styles.listItemText}>
+                              주문 가격:
+                            </span>{' '}
+                            {order.totalPrice}
+                          </span>
+                        </div>
+                        <div className={styles.listItemMeta}>
+                          <span className={styles.listItemText}>
+                            주문 일자:{' '}
+                          </span>
+                          <time>{formatDate(order.createdAt)}</time>
+                          <span>
+                            <span className={styles.listItemText}>
+                              주문 상태:{' '}
+                            </span>
+                            <span
+                              className={
+                                order.status === 'pending'
+                                  ? styles.listItemTextPending
+                                  : order.status === 'completed'
+                                    ? styles.listItemTextCompleted
+                                    : styles.listItemTextCancelled
+                              }
+                            >
+                              {
+                                ORDER_STATUS.find(
+                                  (status) => status.id === order.status,
+                                )?.label
+                              }
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {ordersMeta && ordersMeta.totalPages > 1 && (
+                    <div className={styles.pagination}>
+                      <button
+                        type="button"
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={!ordersMeta.hasPrev}
+                      >
+                        이전
+                      </button>
+                      <span className={styles.pageInfo}>
+                        {ordersMeta.page} / {ordersMeta.totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={!ordersMeta.hasNext}
                       >
                         다음
                       </button>

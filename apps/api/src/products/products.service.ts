@@ -272,6 +272,40 @@ export class ProductsService {
     };
   }
 
+  async getAllOrders(userId: string, query: PaginationQueryDto) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (user === null) {
+      throw new AppException(USERS_ERRORS.USER_NOT_FOUND);
+    }
+
+    if (!user.isAdmin) {
+      throw new AppException(COMMON_ERRORS.FORBIDDEN);
+    }
+
+    const { page, pageSize, skip, take } = getPaginationParams(query);
+
+    const { items, total } = await this.productsRepository.findAllOrders(
+      skip,
+      take,
+    );
+
+    const mappedItems = items.map((item) => ({
+      id: item.id,
+      userId: item.userId,
+      userNickname: item.user.nickname,
+      productId: item.productId,
+      productName: item.product.name,
+      productPrice: item.product.price,
+      quantity: item.quantity,
+      totalPrice: item.totalPrice,
+      status: item.status,
+      createdAt: item.createdAt,
+    }));
+
+    return buildPaginationResponse(mappedItems, total, page, pageSize);
+  }
+
   async getOrdersByUserId(userId: string, query: PaginationQueryDto) {
     const { page, pageSize, skip, take } = getPaginationParams(query);
 
