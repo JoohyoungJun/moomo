@@ -99,7 +99,9 @@ export default function AdminMePage() {
   const queryClient = useQueryClient();
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
   const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+  const [isEditingOrderModalOpen, setIsEditingOrderModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const tabParam = searchParams.get('tab');
   const activeTab: AdminTab = isAdminTab(tabParam) ? tabParam : 'products';
   const pageParam = Number(searchParams.get('page') ?? '1');
@@ -193,10 +195,33 @@ export default function AdminMePage() {
     },
   });
 
+  const deleteOrderMutation = useMutation({
+    mutationFn: (orderId: string) =>
+      apiFetch(`/products/orders/${orderId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      alert('주문이 삭제되었습니다.');
+    },
+    onError: (error) => {
+      alert(`에러가 발생했습니다. ${error.message}`);
+    },
+  });
+
   const handleClickDeleteProduct = (productId: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       deleteProductMutation.mutate(productId);
     }
+  };
+
+  const handleClickDeleteOrder = (order: Order, orderId: string) => {
+    if (!confirm('정말 삭제하시겠습니까? ')) return;
+    if (order.status !== 'cancelled') {
+      alert('취소된 주문만 삭제할 수 있습니다.');
+      return;
+    }
+    deleteOrderMutation.mutate(orderId);
   };
 
   const handleClickEditProduct = (product: Product) => {
@@ -207,6 +232,16 @@ export default function AdminMePage() {
   const handleEditModalClose = () => {
     setIsEditingModalOpen(false);
     setEditingProduct(null);
+  };
+
+  const handleClickEditOrder = (order: Order) => {
+    setEditingOrder(order);
+    setIsEditingOrderModalOpen(true);
+  };
+
+  const handleEditOrderModalClose = () => {
+    setIsEditingOrderModalOpen(false);
+    setEditingOrder(null);
   };
 
   const handleTabChange = (tab: AdminTab) => {
@@ -414,6 +449,24 @@ export default function AdminMePage() {
                               }
                             </span>
                           </span>
+                        </div>
+                        <div className={styles.listItemStats}>
+                          <button
+                            type="button"
+                            className={styles.editButton}
+                            onClick={() => handleClickEditOrder(order)}
+                          >
+                            수정
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.deleteButton}
+                            onClick={() =>
+                              handleClickDeleteOrder(order, order.id)
+                            }
+                          >
+                            삭제
+                          </button>
                         </div>
                       </div>
                     ))}
