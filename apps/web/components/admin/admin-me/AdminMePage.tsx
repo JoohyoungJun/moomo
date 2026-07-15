@@ -194,6 +194,13 @@ export default function AdminMePage() {
     },
   });
 
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: (orderId: string) =>
+      apiFetch(`products/orders/${orderId}/status`, {
+        method: 'PATCH',
+      }),
+  });
+
   const deleteOrderMutation = useMutation({
     mutationFn: (orderId: string) =>
       apiFetch(`/products/orders/${orderId}`, {
