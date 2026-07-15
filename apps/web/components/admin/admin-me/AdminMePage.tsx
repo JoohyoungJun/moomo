@@ -7,8 +7,8 @@ import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import NewProductModal from '@/components/modal/new-product-modal/NewProductModal';
 import { useState } from 'react';
-import { colors } from '@/styles/theme.css';
 import { ORDER_STATUS } from '@/components/me/MePage';
+import OrderUpdateModal from '@/components/modal/order-update-modal/OrderUpdateModal';
 
 type PaginatedResponse<T> = {
   items: T[];
@@ -32,6 +32,8 @@ export type Product = {
   updatedAt: string;
 };
 
+type OrderStatus = 'pending' | 'completed' | 'cancelled';
+
 export type Order = {
   id: string;
   userId: string;
@@ -41,7 +43,7 @@ export type Order = {
   productPrice: number;
   quantity: number;
   totalPrice: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  status: OrderStatus;
   createdAt: string;
 };
 
@@ -60,6 +62,10 @@ type UpdateProductBody = {
   price?: number;
   stock?: number;
   images?: { url: string }[];
+};
+
+export type UpdateOrderStatusBody = {
+  status: OrderStatus;
 };
 
 type ProductDetail = {
@@ -195,6 +201,27 @@ export default function AdminMePage() {
     },
   });
 
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string;
+      body: UpdateOrderStatusBody;
+    }) =>
+      apiFetch(`/products/orders/${orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      setIsEditingOrderModalOpen(false);
+    },
+    onError: (error) => {
+      alert(`에러가 발생했습니다. ${error.message}`);
+    },
+  });
+
   const deleteOrderMutation = useMutation({
     mutationFn: (orderId: string) =>
       apiFetch(`/products/orders/${orderId}`, {
@@ -232,6 +259,7 @@ export default function AdminMePage() {
     setIsEditingModalOpen(true);
   };
 
+
   const handleEditModalClose = () => {
     setIsEditingModalOpen(false);
     setEditingProduct(null);
@@ -245,6 +273,36 @@ export default function AdminMePage() {
   const handleEditOrderModalClose = () => {
     setIsEditingOrderModalOpen(false);
     setEditingOrder(null);
+  };
+
+  const handleNewProductModalOpen = () => {
+    setIsNewProductModalOpen(true);
+  };
+
+  const handleNewProductModalClose = () => {
+    setIsNewProductModalOpen(false);
+  };
+
+  const handleCreateProductSubmit = (product: CreateProductBody) => {
+    createProductMutation.mutate(product);
+  };
+
+  const handleUpdateProductSubmit = (product: UpdateProductBody) => {
+    if (!editingProduct) return;
+
+    updateProductMutation.mutate({
+      productId: editingProduct.id,
+      body: product,
+    });
+  };
+
+  const handleUpdateOrderStatusSubmit = (body: UpdateOrderStatusBody) => {
+    if (!editingOrder) return;
+
+    updateOrderStatusMutation.mutate({
+      orderId: editingOrder.id,
+      body,
+    });
   };
 
   const handleTabChange = (tab: AdminTab) => {
@@ -283,7 +341,7 @@ export default function AdminMePage() {
               <button
                 type="button"
                 className={styles.submitButton}
-                onClick={() => setIsNewProductModalOpen(true)}
+                onClick={handleNewProductModalOpen}
               >
                 새 상품 등록
               </button>
@@ -507,8 +565,8 @@ export default function AdminMePage() {
         key="create-product"
         open={isNewProductModalOpen}
         mode="create"
-        onClose={() => setIsNewProductModalOpen(false)}
-        onSubmit={(product) => createProductMutation.mutate(product)}
+        onClose={handleNewProductModalClose}
+        onSubmit={handleCreateProductSubmit}
         isPending={createProductMutation.isPending}
         error={
           createProductMutation.isError
@@ -545,17 +603,25 @@ export default function AdminMePage() {
               : undefined
         }
         onClose={handleEditModalClose}
-        onSubmit={(product) => {
-          if (!editingProduct) return;
-          updateProductMutation.mutate({
-            productId: editingProduct.id,
-            body: product,
-          });
-        }}
+        onSubmit={handleUpdateProductSubmit}
         isPending={updateProductMutation.isPending}
         error={
           updateProductMutation.isError
             ? updateProductMutation.error.message
+            : undefined
+        }
+      />
+
+      <OrderUpdateModal
+        key={editingOrder?.id}
+        open={isEditingOrderModalOpen}
+        order={editingOrder}
+        onClose={handleEditOrderModalClose}
+        onSubmit={handleUpdateOrderStatusSubmit}
+        isPending={updateOrderStatusMutation.isPending}
+        error={
+          updateOrderStatusMutation.isError
+            ? updateOrderStatusMutation.error.message
             : undefined
         }
       />
