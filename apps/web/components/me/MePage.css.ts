@@ -252,7 +252,7 @@ export const listItemText = style({
 });
 
 export const listItemTextPending = style({
-  color: '#16a34a',
+  color: colors.pending,
 });
 
 export const listItemTextCompleted = style({
@@ -299,4 +299,21 @@ export const pageInfo = style({
   textAlign: 'center',
   fontSize: '14px',
   color: colors.textMuted,
+});
+
+export const editButton = style({
+  marginRight: '0.5rem',
+  color: colors.primary,
+  cursor: 'pointer',
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
+});
+
+export const deleteButton = style({
+  color: colors.danger,
+  cursor: 'pointer',
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
 });

@@ -7,7 +7,8 @@ import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import NewProductModal from '@/components/modal/new-product-modal/NewProductModal';
 import { useState } from 'react';
-import { colors } from '@/styles/theme.css';
+import { ORDER_STATUS } from '@/components/me/MePage';
+import OrderUpdateModal from '@/components/modal/order-update-modal/OrderUpdateModal';
 
 type PaginatedResponse<T> = {
   items: T[];
@@ -31,6 +32,21 @@ export type Product = {
   updatedAt: string;
 };
 
+type OrderStatus = 'pending' | 'completed' | 'cancelled';
+
+export type Order = {
+  id: string;
+  userId: string;
+  userNickname: string;
+  productId: string;
+  productName: string;
+  productPrice: number;
+  quantity: number;
+  totalPrice: number;
+  status: OrderStatus;
+  createdAt: string;
+};
+
 type AdminTab = 'products' | 'orders';
 type CreateProductBody = {
   name: string;
@@ -46,6 +62,10 @@ type UpdateProductBody = {
   price?: number;
   stock?: number;
   images?: { url: string }[];
+};
+
+export type UpdateOrderStatusBody = {
+  status: OrderStatus;
 };
 
 type ProductDetail = {
@@ -85,7 +105,9 @@ export default function AdminMePage() {
   const queryClient = useQueryClient();
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
   const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+  const [isEditingOrderModalOpen, setIsEditingOrderModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const tabParam = searchParams.get('tab');
   const activeTab: AdminTab = isAdminTab(tabParam) ? tabParam : 'products';
   const pageParam = Number(searchParams.get('page') ?? '1');
@@ -107,13 +129,28 @@ export default function AdminMePage() {
     enabled: activeTab === 'products',
   });
 
+  const {
+    data: ordersData,
+    isLoading: isOrdersLoading,
+    isError: isOrdersError,
+    error: ordersError,
+  } = useQuery({
+    queryKey: ['orders', currentPage, PAGE_SIZE],
+    queryFn: () =>
+      apiFetch<PaginatedResponse<Order>>(
+        `/products/orders/all?page=${currentPage}&pageSize=${PAGE_SIZE}`,
+      ),
+    enabled: activeTab === 'orders',
+  });
+
   const products = productsData?.items ?? [];
   const productsMeta = productsData?.meta;
+  const orders = ordersData?.items ?? [];
+  const ordersMeta = ordersData?.meta;
 
   const { data: editingProductDetail } = useQuery({
     queryKey: ['product', editingProduct?.id],
-    queryFn: () =>
-      apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
+    queryFn: () => apiFetch<ProductDetail>(`/products/${editingProduct!.id}`),
     enabled: isEditingModalOpen && Boolean(editingProduct?.id),
   });
 
@@ -164,10 +201,57 @@ export default function AdminMePage() {
     },
   });
 
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string;
+      body: UpdateOrderStatusBody;
+    }) =>
+      apiFetch(`/products/orders/${orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      setIsEditingOrderModalOpen(false);
+    },
+    onError: (error) => {
+      alert(`에러가 발생했습니다. ${error.message}`);
+    },
+  });
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: (orderId: string) =>
+      apiFetch(`/products/orders/${orderId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      alert('주문이 삭제되었습니다.');
+    },
+    onError: (error) => {
+      alert(`에러가 발생했습니다. ${error.message}`);
+    },
+  });
+
   const handleClickDeleteProduct = (productId: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       deleteProductMutation.mutate(productId);
     }
+  };
+
+  const handleClickDeleteOrder = (order: Order, orderId: string) => {
+    if (
+      !confirm('주문을 삭제하시겠습니까? \n취소된 주문만 삭제할 수 있습니다.')
+    )
+      return;
+    if (order.status !== 'cancelled') {
+      alert('취소된 주문만 삭제할 수 있습니다.');
+      return;
+    }
+    deleteOrderMutation.mutate(orderId);
   };
 
   const handleClickEditProduct = (product: Product) => {
@@ -175,9 +259,50 @@ export default function AdminMePage() {
     setIsEditingModalOpen(true);
   };
 
+
   const handleEditModalClose = () => {
     setIsEditingModalOpen(false);
     setEditingProduct(null);
+  };
+
+  const handleClickEditOrder = (order: Order) => {
+    setEditingOrder(order);
+    setIsEditingOrderModalOpen(true);
+  };
+
+  const handleEditOrderModalClose = () => {
+    setIsEditingOrderModalOpen(false);
+    setEditingOrder(null);
+  };
+
+  const handleNewProductModalOpen = () => {
+    setIsNewProductModalOpen(true);
+  };
+
+  const handleNewProductModalClose = () => {
+    setIsNewProductModalOpen(false);
+  };
+
+  const handleCreateProductSubmit = (product: CreateProductBody) => {
+    createProductMutation.mutate(product);
+  };
+
+  const handleUpdateProductSubmit = (product: UpdateProductBody) => {
+    if (!editingProduct) return;
+
+    updateProductMutation.mutate({
+      productId: editingProduct.id,
+      body: product,
+    });
+  };
+
+  const handleUpdateOrderStatusSubmit = (body: UpdateOrderStatusBody) => {
+    if (!editingOrder) return;
+
+    updateOrderStatusMutation.mutate({
+      orderId: editingOrder.id,
+      body,
+    });
   };
 
   const handleTabChange = (tab: AdminTab) => {
@@ -216,7 +341,7 @@ export default function AdminMePage() {
               <button
                 type="button"
                 className={styles.submitButton}
-                onClick={() => setIsNewProductModalOpen(true)}
+                onClick={handleNewProductModalOpen}
               >
                 새 상품 등록
               </button>
@@ -266,27 +391,14 @@ export default function AdminMePage() {
                           <time>{formatDate(product.createdAt)}</time>
                           <button
                             type="button"
-                            style={{
-                              marginRight: '0.5rem',
-                              color: colors.primary,
-                              cursor: 'pointer',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                            }}
+                            className={styles.editButton}
                             onClick={() => handleClickEditProduct(product)}
                           >
                             수정
                           </button>
                           <button
                             type="button"
-                            style={{
-                              color: colors.danger,
-                              cursor: 'pointer',
-                              backgroundColor: 'transparent',
-                              border: 'none',
-                              padding: 0,
-                            }}
+                            className={styles.deleteButton}
                             onClick={() => handleClickDeleteProduct(product.id)}
                           >
                             삭제
@@ -321,6 +433,131 @@ export default function AdminMePage() {
                   )}
                 </>
               )}
+
+            {activeTab === 'orders' && isOrdersLoading && (
+              <p className={styles.state}>주문 내역 불러오는중...</p>
+            )}
+
+            {activeTab === 'orders' && isOrdersError && (
+              <p className={styles.error}>{ordersError.message}</p>
+            )}
+
+            {activeTab === 'orders' &&
+              !isOrdersError &&
+              !isOrdersLoading &&
+              orders.length === 0 && (
+                <p className={styles.state}>주문이 없습니다.</p>
+              )}
+
+            {activeTab === 'orders' &&
+              !isOrdersError &&
+              !isOrdersLoading &&
+              orders.length > 0 && (
+                <>
+                  <div className={styles.list}>
+                    {orders.map((order) => (
+                      <div key={order.id} className={styles.listItem}>
+                        <h2 className={styles.listItemTitle}>
+                          {order.productName}
+                        </h2>
+
+                        <div className={styles.listItemStats}>
+                          <span>
+                            <span className={styles.listItemText}>주문자:</span>{' '}
+                            {order.userNickname}
+                          </span>
+                          <span>
+                            <span className={styles.listItemText}>
+                              상품 가격:
+                            </span>{' '}
+                            {order.productPrice}
+                          </span>
+                          <span>
+                            <span className={styles.listItemText}>
+                              주문 수량:
+                            </span>{' '}
+                            {order.quantity}
+                          </span>
+                          <span>
+                            <span className={styles.listItemText}>
+                              주문 가격:
+                            </span>{' '}
+                            {order.totalPrice}
+                          </span>
+                        </div>
+                        <div className={styles.listItemMeta}>
+                          <span className={styles.listItemText}>
+                            주문 일자:{' '}
+                          </span>
+                          <time>{formatDate(order.createdAt)}</time>
+                          <span>
+                            <span className={styles.listItemText}>
+                              주문 상태:{' '}
+                            </span>
+                            <span
+                              className={
+                                order.status === 'pending'
+                                  ? styles.listItemTextPending
+                                  : order.status === 'completed'
+                                    ? styles.listItemTextCompleted
+                                    : styles.listItemTextCancelled
+                              }
+                            >
+                              {
+                                ORDER_STATUS.find(
+                                  (status) => status.id === order.status,
+                                )?.label
+                              }
+                            </span>
+                          </span>
+                        </div>
+                        <div className={styles.listItemStats}>
+                          <button
+                            type="button"
+                            className={styles.editButton}
+                            onClick={() => handleClickEditOrder(order)}
+                          >
+                            수정
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.deleteButton}
+                            onClick={() =>
+                              handleClickDeleteOrder(order, order.id)
+                            }
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {ordersMeta && ordersMeta.totalPages > 1 && (
+                    <div className={styles.pagination}>
+                      <button
+                        type="button"
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={!ordersMeta.hasPrev}
+                      >
+                        이전
+                      </button>
+                      <span className={styles.pageInfo}>
+                        {ordersMeta.page} / {ordersMeta.totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        className={styles.pageButton}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={!ordersMeta.hasNext}
+                      >
+                        다음
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
           </div>
         </div>
       </div>
@@ -328,8 +565,8 @@ export default function AdminMePage() {
         key="create-product"
         open={isNewProductModalOpen}
         mode="create"
-        onClose={() => setIsNewProductModalOpen(false)}
-        onSubmit={(product) => createProductMutation.mutate(product)}
+        onClose={handleNewProductModalClose}
+        onSubmit={handleCreateProductSubmit}
         isPending={createProductMutation.isPending}
         error={
           createProductMutation.isError
@@ -366,17 +603,25 @@ export default function AdminMePage() {
               : undefined
         }
         onClose={handleEditModalClose}
-        onSubmit={(product) => {
-          if (!editingProduct) return;
-          updateProductMutation.mutate({
-            productId: editingProduct.id,
-            body: product,
-          });
-        }}
+        onSubmit={handleUpdateProductSubmit}
         isPending={updateProductMutation.isPending}
         error={
           updateProductMutation.isError
             ? updateProductMutation.error.message
+            : undefined
+        }
+      />
+
+      <OrderUpdateModal
+        key={editingOrder?.id}
+        open={isEditingOrderModalOpen}
+        order={editingOrder}
+        onClose={handleEditOrderModalClose}
+        onSubmit={handleUpdateOrderStatusSubmit}
+        isPending={updateOrderStatusMutation.isPending}
+        error={
+          updateOrderStatusMutation.isError
+            ? updateOrderStatusMutation.error.message
             : undefined
         }
       />

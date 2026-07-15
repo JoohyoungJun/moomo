@@ -93,6 +93,17 @@ export class UserOrderResponseDto {
   declare createdAt: Date;
 }
 
+export class OrderListResponseDto extends UserOrderResponseDto {
+  @ApiProperty({ description: '주문자 id' })
+  declare userId: string;
+
+  @ApiProperty({ description: '주문자 닉네임' })
+  declare userNickname: string;
+
+  @ApiProperty({ description: '상품 가격' })
+  declare productPrice: number;
+}
+
 export class UpdateOrderResponseDto extends OmitType(UserOrderResponseDto, [
   'productId',
   'productName',
@@ -108,4 +119,9 @@ export class UpdateOrderResponseDto extends OmitType(UserOrderResponseDto, [
 
   @ApiProperty({ description: '주문 수정일' })
   declare updatedAt: Date;
+}
+
+export class DeleteOrderResponseDto {
+  @ApiProperty({ description: '삭제 확인 메시지' })
+  declare message: string;
 }

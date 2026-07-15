@@ -6,6 +6,7 @@ export const colors = {
   background: '#ffffff',
   surface: '#f8f9fb',
   danger: '#dc2626',
+  pending: '#16a34a',
 };
 
 export const layout = {
