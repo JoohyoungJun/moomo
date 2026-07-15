@@ -68,7 +68,7 @@ const PAGE_SIZE = 4;
 
 type OrderStatus = 'pending' | 'completed' | 'cancelled';
 
-const ORDER_STATUS: { id: OrderStatus; label: string }[] = [
+export const ORDER_STATUS: { id: OrderStatus; label: string }[] = [
   { id: 'pending', label: '처리중' },
   { id: 'completed', label: '처리 완료' },
   { id: 'cancelled', label: '취소' },
