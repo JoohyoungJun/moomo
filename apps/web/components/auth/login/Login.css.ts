@@ -4,6 +4,7 @@ import { colors } from '@/styles/theme.css';
 export const page = style({
   width: '100%',
   flex: 'none',
+  flexDirection: 'unset',
   padding: 0,
   margin: 0,
   maxWidth: 'none',
