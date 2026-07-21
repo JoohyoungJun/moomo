@@ -1,7 +1,9 @@
 # Moomo
 
-커뮤니티(게시글·댓글·좋아요·알림)와 상품 주문 기능을 함께 둔 풀스택 웹 애플리케이션입니다.  
-`pnpm` 모노레포로 API와 Web을 분리해 관리합니다.
+- 무인 매장 커뮤니티, 무인 매장 운영자들의 모임, 무모입니다.
+- 커뮤니티(게시글·댓글·좋아요·알림)와 상품 주문 기능을 함께 둔 풀스택 웹 애플리케이션입니다.
+- 관리자 계정으로 상품 관리, 주문 목록 조회가 가능합니다.
+- `pnpm` 모노레포로 API와 Web을 분리해 관리합니다.
 
 ```
 apps/
@@ -19,32 +21,32 @@ apps/
 
 로컬 기준:
 
-| 서비스 | URL |
-|--------|-----|
-| Web | `http://localhost:3000` |
-| API | `http://localhost:8000` |
+| 서비스  | URL                              |
+| ------- | -------------------------------- |
+| Web     | `http://localhost:3000`          |
+| API     | `http://localhost:8000`          |
 | Swagger | `http://localhost:8000/api/docs` |
 
 ## 기술 스택
 
 ### 공통
 
-| 구분 | 기술 |
-|------|------|
-| 모노레포 | pnpm workspace |
-| 언어 | TypeScript |
-| DB | PostgreSQL |
-| ORM | Prisma |
+| 구분        | 기술             |
+| ----------- | ---------------- |
+| 모노레포    | pnpm workspace   |
+| 언어        | TypeScript       |
+| DB          | PostgreSQL       |
+| ORM         | Prisma           |
 | 이미지 저장 | Supabase Storage |
 
 ### API (`apps/api`)
 
-| 구분 | 기술 |
-|------|------|
-| 프레임워크 | NestJS 11 (Express) |
-| 인증 | JWT (Access / Refresh), Passport, bcrypt, Cookie |
-| 문서화 | Swagger (`/api/docs`) |
-| 검증 | class-validator, class-transformer |
+| 구분       | 기술                                             |
+| ---------- | ------------------------------------------------ |
+| 프레임워크 | NestJS 11 (Express)                              |
+| 인증       | JWT (Access / Refresh), Passport, bcrypt, Cookie |
+| 문서화     | Swagger (`/api/docs`)                            |
+| 검증       | class-validator, class-transformer               |
 
 **구조**
 
@@ -55,13 +57,13 @@ apps/
 
 ### Web (`apps/web`)
 
-| 구분 | 기술 |
-|------|------|
-| 프레임워크 | Next.js (App Router) |
-| UI | React 19 |
-| 스타일 | Vanilla Extract |
-| 서버 상태 | TanStack Query |
-| API 연동 | Cookie 기반 인증 (`NEXT_PUBLIC_API_URL`) |
+| 구분       | 기술                                     |
+| ---------- | ---------------------------------------- |
+| 프레임워크 | Next.js (App Router)                     |
+| UI         | React 19                                 |
+| 스타일     | Vanilla Extract                          |
+| 서버 상태  | TanStack Query                           |
+| API 연동   | Cookie 기반 인증 (`NEXT_PUBLIC_API_URL`) |
 
 ## 개발 이유
 
